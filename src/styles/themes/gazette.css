@@ -13,16 +13,13 @@
 }
 
 /* Base Window Styling */
-.journal-theme-gazette .window-content,
 .journal-theme-gazette.journal-entry-pages, .journal-theme-gazette .journal-entry-pages,
 .journal-theme-gazette.journal-entry-page, .journal-theme-gazette .journal-entry-page,
 .journal-theme-gazette.journal-page-content, .journal-theme-gazette .journal-page-content,
 .journal-theme-gazette.page-content, .journal-theme-gazette .page-content,
 .journal-theme-gazette.editor-container, .journal-theme-gazette .editor-container,
 .journal-theme-gazette.editor-content, .journal-theme-gazette .editor-content,
-.journal-theme-gazette.journal-sheet-container, .journal-theme-gazette .journal-sheet-container,
-.journal-theme-gazette .ProseMirror, .journal-theme-gazette .prosemirror,
-.journal-theme-gazette .editor {
+.journal-theme-gazette .ProseMirror, .journal-theme-gazette .prosemirror {
     background: var(--gazette-bg) !important;
     background-image: url("https://www.transparenttextures.com/patterns/paper-fibers.png") !important;
     color: var(--gazette-text);

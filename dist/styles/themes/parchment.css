@@ -7,9 +7,7 @@
 .journal-theme-parchment.page-content, .journal-theme-parchment .page-content,
 .journal-theme-parchment.editor-container, .journal-theme-parchment .editor-container,
 .journal-theme-parchment.editor-content, .journal-theme-parchment .editor-content,
-.journal-theme-parchment.journal-sheet-container, .journal-theme-parchment .journal-sheet-container,
-.journal-theme-parchment .ProseMirror, .journal-theme-parchment .prosemirror,
-.journal-theme-parchment .editor { 
+.journal-theme-parchment .ProseMirror, .journal-theme-parchment .prosemirror { 
   background: var(--parchment-bg, #fdf5e6) !important; 
   background-image: url('https://www.transparenttextures.com/patterns/handmade-paper.png') !important; 
   color: var(--parchment-text, #3e2723) !important; 

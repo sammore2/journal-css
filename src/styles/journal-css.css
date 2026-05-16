@@ -393,11 +393,7 @@ textarea {
 .journal-theme-parchment.prosemirror,
 .journal-theme-parchment .prosemirror,
 .journal-theme-parchment.ProseMirror,
-.journal-theme-parchment .ProseMirror,
-.journal-theme-parchment.journal-sheet-container,
-.journal-theme-parchment .journal-sheet-container,
-.journal-theme-parchment.scrollable,
-.journal-theme-parchment .scrollable {
+.journal-theme-parchment .ProseMirror {
     background: var(--parchment-bg, #fdf5e6) !important;
     background-image: url("https://www.transparenttextures.com/patterns/handmade-paper.png") !important;
     color: var(--parchment-text, #3e2723) !important;
@@ -405,19 +401,11 @@ textarea {
     padding: 20px !important;
 }
 
-.journal-theme-parchment .journal-page-header .journal-page-title,
-.journal-theme-parchment .directory-item .name,
-.journal-theme-parchment .directory-header .name,
 .journal-theme-parchment h1,
 .journal-theme-parchment h2,
 .journal-theme-parchment h3 {
     color: var(--parchment-text, #3e2723) !important;
     text-shadow: none !important;
-}
-
-.journal-theme-parchment .journal-sidebar {
-    background: rgba(0, 0, 0, 0.03) !important;
-    border-right: 1px solid rgba(62, 39, 35, 0.2) !important;
 }
 
 .journal-theme-parchment .prosemirror,

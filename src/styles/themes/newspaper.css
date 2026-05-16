@@ -5,9 +5,7 @@
 .journal-theme-newspaper.page-content, .journal-theme-newspaper .page-content,
 .journal-theme-newspaper.editor-container, .journal-theme-newspaper .editor-container,
 .journal-theme-newspaper.editor-content, .journal-theme-newspaper .editor-content,
-.journal-theme-newspaper.journal-sheet-container, .journal-theme-newspaper .journal-sheet-container,
-.journal-theme-newspaper .ProseMirror, .journal-theme-newspaper .prosemirror,
-.journal-theme-newspaper .editor { background: var(--newspaper-bg, #f2e6c8) !important; color: var(--newspaper-ink, #1e1200) !important; padding: 25px !important; }
+.journal-theme-newspaper .ProseMirror, .journal-theme-newspaper .prosemirror { background: var(--newspaper-bg, #f2e6c8) !important; color: var(--newspaper-ink, #1e1200) !important; padding: 25px !important; }
 
 .newspaper-gazette { width: 100%; border: 5px double var(--newspaper-ink, #1e1200); padding: 25px; font-family: 'Playfair Display', serif; box-sizing: border-box; color: var(--newspaper-ink, #1e1200); }
 

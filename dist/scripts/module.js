@@ -499,12 +499,14 @@ function injectThemeButton(appEl, appObj) {
     }
     if (header.querySelector(".journal-css-selector"))
         return;
+    const isPage = appObj.document?.documentName === "JournalEntryPage";
+    if (!isPage)
+        return; // Injeta o botão apenas na janela de edição/página solta, mantendo o Registro principal limpo
     const btn = document.createElement("button");
     btn.type = "button";
     btn.classList.add("header-control", "journal-css-selector");
     btn.innerHTML = '<i class="fas fa-wand-magic-sparkles"></i>';
-    const isPage = appObj.document?.documentName === "JournalEntryPage";
-    btn.title = isPage ? "Modelos de Página" : game.i18n.localize("JOURNAL_CSS.ButtonTitle");
+    btn.title = "Modelos de Página";
     btn.onclick = (ev) => {
         ev.preventDefault();
         ev.stopPropagation();
@@ -541,7 +543,7 @@ async function applyJournalTheme(sheet, themeOverride, varsOverride) {
     const parentTheme = doc.parent?.getFlag(MODULE_ID, "theme");
     const selectedTheme = themeOverride || doc.getFlag(MODULE_ID, "theme") || parentTheme || "none";
     // Find the content container (the actual "sheet" or "page")
-    const targetEl = element.querySelector(".journal-entry-pages, .journal-entry-page, .journal-page-content, .page-content, .editor-container, .editor-content, .prosemirror, .ProseMirror, .journal-sheet-container") || element;
+    const targetEl = element.querySelector(".journal-entry-page, .journal-entry-pages, .editor-container, .journal-page-content, .page-content, .editor-content, .prosemirror, .ProseMirror") || element;
     targetEl.classList.forEach((cls) => { if (cls.startsWith('journal-theme-'))
         targetEl.classList.remove(cls); });
     if (selectedTheme !== "none")
@@ -549,7 +551,7 @@ async function applyJournalTheme(sheet, themeOverride, varsOverride) {
     const parentVars = doc.parent?.getFlag(MODULE_ID, "themeVars") || {};
     const themeVars = varsOverride || doc.getFlag(MODULE_ID, "themeVars") || parentVars || {};
     ThemeRegistry.applyThemeVariables(targetEl, selectedTheme, themeVars);
-    const contentEl = element.querySelector(".ProseMirror, .editor-content, .page-content");
+    const contentEl = element.querySelector(".ProseMirror, .editor-content, .page-content, .journal-page-content");
     if (!contentEl)
         return;
     // Legacy Tweaks (Compat)
@@ -575,6 +577,29 @@ async function applyJournalTheme(sheet, themeOverride, varsOverride) {
     }
     else if (styleTag)
         styleTag.remove();
+    // Configura um MutationObserver ultraleve no element para interceptar quando o Foundry V14 alterna dinamicamente para o modo de edição (ProseMirror)
+    if (!element._journalThemeObserver) {
+        const observer = new MutationObserver((mutations) => {
+            for (const m of mutations) {
+                if (m.addedNodes.length > 0) {
+                    // Se algum nó adicionado for o editor ProseMirror ou contiver o editor, re-aplica a classe do tema
+                    const addedEditor = Array.from(m.addedNodes).find(n => n.classList && (n.classList.contains("editor") || n.classList.contains("ProseMirror") || n.classList.contains("editor-container") || n.querySelector(".ProseMirror, .editor, .editor-container")));
+                    if (addedEditor) {
+                        // Re-aplica as classes e variáveis no novo elemento do editor
+                        const newTarget = element.querySelector(".journal-entry-page, .journal-entry-pages, .editor-container, .journal-page-content, .page-content, .editor-content, .prosemirror, .ProseMirror") || element;
+                        newTarget.classList.forEach((cls) => { if (cls.startsWith('journal-theme-'))
+                            newTarget.classList.remove(cls); });
+                        if (selectedTheme !== "none")
+                            newTarget.classList.add(`journal-theme-${selectedTheme}`);
+                        ThemeRegistry.applyThemeVariables(newTarget, selectedTheme, themeVars);
+                        break;
+                    }
+                }
+            }
+        });
+        observer.observe(element, { childList: true, subtree: true });
+        element._journalThemeObserver = observer;
+    }
 }
 Hooks.on("renderJournalSheet", (app, html) => {
     const element = html[0] || html;
@@ -590,6 +615,47 @@ Hooks.on("renderJournalPageSheet", (app, html) => {
     const element = html[0] || html;
     applyJournalTheme(app);
     injectThemeButton(element, app);
+});
+Hooks.on("renderJournalEntryPageProseMirrorSheet", (app, html) => {
+    const element = html[0] || html;
+    applyJournalTheme(app);
+    injectThemeButton(element, app);
+});
+Hooks.on("renderJournalEntryPageTextSheet", (app, html) => {
+    const element = html[0] || html;
+    applyJournalTheme(app);
+    injectThemeButton(element, app);
+});
+Hooks.on("createProseMirrorEditor", (uuid, plugins, options) => {
+    setTimeout(() => {
+        Object.values(ui.windows).forEach((app) => {
+            if (app.document?.documentName?.startsWith("JournalEntry")) {
+                applyJournalTheme(app);
+            }
+        });
+    }, 50);
+});
+Hooks.on("updateJournalEntryPage", (doc, change, options, userId) => {
+    if (change.flags?.[MODULE_ID]) {
+        setTimeout(() => {
+            Object.values(ui.windows).forEach((app) => {
+                if (app.document === doc || app.document?.pages?.get?.(doc.id) || app.document?.id === doc.parent?.id) {
+                    applyJournalTheme(app);
+                }
+            });
+        }, 50);
+    }
+});
+Hooks.on("updateJournalEntry", (doc, change, options, userId) => {
+    if (change.flags?.[MODULE_ID]) {
+        setTimeout(() => {
+            Object.values(ui.windows).forEach((app) => {
+                if (app.document === doc || app.document?.parent?.id === doc.id) {
+                    applyJournalTheme(app);
+                }
+            });
+        }, 50);
+    }
 });
 Hooks.on("ready", () => {
     // Re-apply to all open journals
