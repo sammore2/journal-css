@@ -378,8 +378,14 @@ textarea {
 }
 
 /* Base Window Styling - Target CONTENT only (Red Circle Fix) */
+.journal-theme-parchment.journal-entry-pages,
+.journal-theme-parchment .journal-entry-pages,
+.journal-theme-parchment.journal-entry-page,
+.journal-theme-parchment .journal-entry-page,
 .journal-theme-parchment.journal-page-content,
 .journal-theme-parchment .journal-page-content,
+.journal-theme-parchment.page-content,
+.journal-theme-parchment .page-content,
 .journal-theme-parchment.editor-container,
 .journal-theme-parchment .editor-container,
 .journal-theme-parchment.editor-content,

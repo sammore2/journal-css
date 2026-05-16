@@ -609,7 +609,7 @@ async function applyJournalTheme(sheet: any, themeOverride?: string, varsOverrid
   const selectedTheme = themeOverride || doc.getFlag(MODULE_ID, "theme") || parentTheme || "none";
   
   // Find the content container (the actual "sheet" or "page")
-  const targetEl = element.querySelector(".journal-page-content, .editor-content, .prosemirror") as HTMLElement || element;
+  const targetEl = element.querySelector(".journal-entry-pages, .journal-entry-page, .journal-page-content, .page-content, .editor-container, .editor-content, .prosemirror, .ProseMirror, .journal-sheet-container") as HTMLElement || element;
 
   targetEl.classList.forEach((cls: string) => { if (cls.startsWith('journal-theme-')) targetEl.classList.remove(cls); });
   if (selectedTheme !== "none") targetEl.classList.add(`journal-theme-${selectedTheme}`);
