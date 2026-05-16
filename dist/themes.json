@@ -1,8 +1,8 @@
 [
   {
     "id": "newspaper",
-    "name": "JOURNAL_CSS.Themes.Gazette",
-    "description": "JOURNAL_CSS.Themes.GazetteDesc",
+    "name": "Newspaper Gazette",
+    "description": "Layout editorial clássico com colunas e cabeçalho de jornal.",
     "icon": "fas fa-newspaper",
     "cssPath": "modules/journal-css/styles/themes/newspaper.css",
     "layoutPath": "modules/journal-css/templates/layouts/newspaper.hbs",
