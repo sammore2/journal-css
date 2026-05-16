@@ -1,16 +1,84 @@
-/* Newspaper Gazette Theme */
+/* Newspaper Gazette Theme - Premium Editorial Design System */
 .journal-theme-newspaper.journal-page-content, .journal-theme-newspaper .journal-page-content,
 .journal-theme-newspaper.editor-content, .journal-theme-newspaper .editor-content,
-.journal-theme-newspaper .ProseMirror { background: var(--newspaper-bg, #f2e6c8) !important; color: var(--newspaper-ink, #1e1200) !important; padding: 20px !important; }
-.newspaper-gazette { width: 100%; border: 5px double var(--newspaper-ink, #1e1200); padding: 20px; font-family: 'Playfair Display', serif; box-sizing: border-box; }
-.newspaper-gazette .header { text-align: center; border-bottom: 3px solid var(--newspaper-ink, #1e1200); padding-bottom: 10px; margin-bottom: 20px; }
-.newspaper-gazette .masthead .paper-name { font-size: 54px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; }
+.journal-theme-newspaper .ProseMirror { background: var(--newspaper-bg, #f2e6c8) !important; color: var(--newspaper-ink, #1e1200) !important; padding: 25px !important; }
+
+.newspaper-gazette { width: 100%; border: 5px double var(--newspaper-ink, #1e1200); padding: 25px; font-family: 'Playfair Display', serif; box-sizing: border-box; color: var(--newspaper-ink, #1e1200); }
+
+/* Header & Masthead */
+.newspaper-gazette .header { text-align: center; border-bottom: 3px solid var(--newspaper-ink, #1e1200); padding-bottom: 15px; margin-bottom: 20px; }
+.newspaper-gazette .header-meta { font-size: 11px; text-transform: uppercase; border-bottom: 1px solid var(--newspaper-ink, #1e1200); padding-bottom: 5px; margin-bottom: 15px; display: flex; justify-content: space-between; font-family: 'Libre Baskerville', serif; }
+.newspaper-gazette .masthead { margin: 15px 0; }
+.newspaper-gazette .masthead .paper-name { font-size: 62px; font-weight: 900; text-transform: uppercase; letter-spacing: 3px; display: block; line-height: 1; margin-bottom: 5px; }
+.newspaper-gazette .masthead .paper-subtitle { font-size: 16px; font-style: italic; font-family: 'Libre Baskerville', serif; display: block; margin-top: 5px; }
+.newspaper-gazette .header-bottom { font-size: 12px; text-transform: uppercase; border-top: 1px solid var(--newspaper-ink, #1e1200); padding-top: 5px; display: flex; justify-content: space-between; font-family: 'Libre Baskerville', serif; font-weight: 600; }
+
+/* Alert Banner */
+.newspaper-gazette .alert-banner { border: 2px solid var(--newspaper-ink, #1e1200); padding: 10px; text-align: center; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 25px; background: rgba(0, 0, 0, 0.06); font-size: 16px; }
+
+/* Grid & Column Layouts */
+.newspaper-gazette .body { display: flex; flex-direction: column; gap: 25px; }
+.newspaper-gazette .col-layout { display: grid; gap: 25px; }
+.newspaper-gazette .col-2-wide { grid-template-columns: 2.2fr 1fr; }
+.newspaper-gazette .col-3 { grid-template-columns: repeat(3, 1fr); }
+.newspaper-gazette .col-2 { grid-template-columns: 1.5fr 1fr; }
+
+/* Column Separators & Borders */
+.newspaper-gazette .col-sep { border-right: 1px solid var(--newspaper-ink, #1e1200); padding-right: 25px; }
+.newspaper-gazette .col-sep-left { padding-left: 5px; }
+.newspaper-gazette .col-layout.col-3 .col-sep:nth-child(2) { border-right: 1px solid var(--newspaper-ink, #1e1200); padding-right: 25px; }
+
+/* Typography */
+.newspaper-gazette .kicker { font-size: 13px; text-transform: uppercase; font-weight: 800; border-bottom: 2px solid var(--newspaper-ink, #1e1200); padding-bottom: 2px; margin-bottom: 12px; display: inline-block; font-family: 'Libre Baskerville', serif; }
+.newspaper-gazette .headline { font-weight: 900; line-height: 1.1; margin: 0 0 15px 0; font-family: 'Playfair Display', serif; text-align: center; }
+.newspaper-gazette .headline.xl { font-size: 38px; }
+.newspaper-gazette .headline.lg { font-size: 28px; }
+.newspaper-gazette .headline.md { font-size: 22px; }
+.newspaper-gazette .sub-headline { font-size: 20px; font-style: italic; margin-bottom: 15px; text-align: center; border-bottom: 1px dashed var(--newspaper-ink, #1e1200); padding-bottom: 10px; }
+
+.newspaper-gazette .deck { font-size: 16px; font-style: italic; line-height: 1.4; margin-bottom: 15px; font-family: 'Libre Baskerville', serif; border-bottom: 1px dashed var(--newspaper-ink, #1e1200); padding-bottom: 12px; }
+.newspaper-gazette .byline { font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 18px; display: block; font-family: 'Libre Baskerville', serif; }
+
+.newspaper-gazette .body-text { font-family: 'Libre Baskerville', serif; line-height: 1.6; font-size: 15px; text-align: justify; }
+.newspaper-gazette .body-text p { margin-bottom: 15px; }
+.newspaper-gazette .side-body { font-family: 'Libre Baskerville', serif; line-height: 1.5; font-size: 14px; text-align: justify; }
+.newspaper-gazette .drop-cap:first-letter { font-size: 3.5em; float: left; line-height: 0.8; margin-right: 8px; font-weight: 900; font-family: 'Playfair Display', serif; }
+
+/* Pull Quotes */
+.newspaper-gazette .pull-quote { border-top: 2px solid var(--newspaper-ink, #1e1200); border-bottom: 2px solid var(--newspaper-ink, #1e1200); padding: 15px 20px; margin: 25px 0; font-size: 18px; font-style: italic; text-align: center; font-family: 'Playfair Display', serif; background: rgba(0,0,0,0.03); }
+
+/* Missing Cards & Target Cards */
+.newspaper-gazette .missing-card { border: 3px double var(--newspaper-ink, #1e1200); padding: 15px; margin-bottom: 20px; background: rgba(0,0,0,0.04); text-align: center; }
+.newspaper-gazette .missing-card .label { font-size: 12px; font-weight: 800; text-transform: uppercase; display: block; letter-spacing: 1px; margin-bottom: 5px; }
+.newspaper-gazette .missing-card .name { font-size: 24px; font-weight: 900; font-family: 'Playfair Display', serif; display: block; margin-bottom: 10px; border-bottom: 1px solid var(--newspaper-ink, #1e1200); padding-bottom: 5px; }
+.newspaper-gazette .missing-card .details { font-size: 13px; font-family: 'Libre Baskerville', serif; line-height: 1.5; }
+
+/* Statistics & Numbers */
+.newspaper-gazette .stat-number { font-size: 48px; font-weight: 900; display: block; line-height: 1; font-family: 'Playfair Display', serif; }
+.newspaper-gazette .stat-label { font-size: 12px; text-transform: uppercase; font-weight: 700; display: block; font-family: 'Libre Baskerville', serif; margin-top: 5px; }
+
+/* Horizontal Rules */
+.newspaper-gazette .rule { border: none; border-top: 3px solid var(--newspaper-ink, #1e1200); margin: 30px 0; }
+.newspaper-gazette .rule-thin { border: none; border-top: 1px solid var(--newspaper-ink, #1e1200); margin: 20px 0; }
+
+/* Boxes & Notices */
+.newspaper-gazette .box { border: 2px solid var(--newspaper-ink, #1e1200); margin-bottom: 20px; background: rgba(0,0,0,0.05); }
+.newspaper-gazette .box-title { background: var(--newspaper-ink, #1e1200); color: var(--newspaper-bg, #f2e6c8); padding: 8px 12px; font-size: 14px; font-weight: 800; text-transform: uppercase; text-align: center; letter-spacing: 1px; margin: 0; }
+.newspaper-gazette .box-body { padding: 15px; font-size: 14px; font-family: 'Libre Baskerville', serif; line-height: 1.5; text-align: justify; margin: 0; }
+
+/* Classifieds */
+.newspaper-gazette .classifieds-block { margin-top: 20px; border-top: 2px dashed var(--newspaper-ink, #1e1200); padding-top: 15px; }
+.newspaper-gazette .classified-item { font-size: 13px; font-family: 'Libre Baskerville', serif; line-height: 1.4; margin-bottom: 12px; text-align: justify; }
+.newspaper-gazette .classified-head { font-weight: 800; text-transform: uppercase; }
+
+/* Advertisement */
+.newspaper-gazette .advertisement { border: 2px solid var(--newspaper-ink, #1e1200); padding: 15px; text-align: center; margin-top: 20px; background: rgba(0,0,0,0.05); }
+
+/* Footer */
+.newspaper-gazette .footer { text-align: center; border-top: 2px solid var(--newspaper-ink, #1e1200); margin-top: 30px; padding-top: 15px; font-size: 12px; font-family: 'Libre Baskerville', serif; display: flex; justify-content: space-between; text-transform: uppercase; }
+.newspaper-gazette .footer .ornament { letter-spacing: 3px; font-size: 10px; }
+
+/* Legacy Fallback for old layouts */
 .newspaper-gazette .layout-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
 .newspaper-gazette .main-article { border-right: 1px solid var(--newspaper-ink, #1e1200); padding-right: 20px; }
 .newspaper-gazette .side-article { padding-left: 0px; }
-.newspaper-gazette .headline { font-weight: 900; font-size: 32px; line-height: 1.1; margin-top: 0; margin-bottom: 10px; text-align: center; }
-.newspaper-gazette .sub-headline { font-size: 20px; font-style: italic; margin-bottom: 15px; text-align: center; border-bottom: 1px dashed var(--newspaper-ink, #1e1200); padding-bottom: 10px; }
-.newspaper-gazette .body-text { font-family: 'Libre Baskerville', serif; line-height: 1.6; column-count: 2; column-gap: 20px; text-align: justify; }
-.newspaper-gazette .side-body { font-family: 'Libre Baskerville', serif; line-height: 1.5; font-size: 14px; text-align: justify; }
-.newspaper-gazette .advertisement { border: 2px solid var(--newspaper-ink, #1e1200); padding: 15px; text-align: center; margin-top: 20px; background: rgba(0,0,0,0.05); }
-.newspaper-gazette .drop-cap:first-letter { font-size: 3em; float: left; line-height: 0.8; margin-right: 5px; font-weight: bold; }
