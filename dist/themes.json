@@ -1,32 +1,32 @@
 [
   {
-    "id": "none",
-    "name": "Nenhum",
-    "description": "Estilo visual padrão do Foundry.",
-    "icon": "fas fa-prohibit",
-    "variables": []
-  },
-  {
-    "id": "oakhaven",
-    "name": "Gazeta de Oakhaven",
-    "description": "Layout editorial clássico de 1902.",
+    "id": "newspaper",
+    "name": "JOURNAL_CSS.Themes.Gazette",
+    "description": "JOURNAL_CSS.Themes.GazetteDesc",
     "icon": "fas fa-newspaper",
-    "cssPath": "modules/journal-css/styles/themes/oakhaven.css",
-    "layoutPath": "modules/journal-css/templates/layouts/oakhaven.hbs",
+    "cssPath": "modules/journal-css/styles/themes/newspaper.css",
+    "layoutPath": "modules/journal-css/templates/layouts/newspaper.hbs",
     "variables": [
       {
-        "key": "--oakhaven-bg",
+        "key": "--newspaper-bg",
         "label": "Cor do Papel",
         "type": "color",
         "default": "#f2e6c8"
       },
       {
-        "key": "--oakhaven-ink",
+        "key": "--newspaper-ink",
         "label": "Cor da Tinta",
         "type": "color",
         "default": "#1e1200"
       }
     ]
+  },
+  {
+    "id": "none",
+    "name": "Nenhum",
+    "description": "Estilo visual padrão do Foundry.",
+    "icon": "fas fa-prohibit",
+    "variables": []
   },
   {
     "id": "parchment",

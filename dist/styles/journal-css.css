@@ -2,7 +2,7 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=JetBrains+Mono&display=swap');
 @import url('themes/parchment.css');
-@import url('themes/oakhaven.css');
+@import url('themes/newspaper.css');
 
 #journal-theme-selector {
     --glass: rgba(18, 18, 24, 0.96);
@@ -345,7 +345,7 @@ textarea {
     border-bottom: 1px solid var(--glass-border);
 }
 
-.template-preview.oakhaven {
+.template-preview.newspaper {
     background-color: #f2e6c8;
     background-image: url("https://www.transparenttextures.com/patterns/pinstriped-suit.png");
 }

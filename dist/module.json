@@ -25,7 +25,7 @@
   ],
   "styles": [
     "styles/journal-css.css",
-    "styles/themes/oakhaven.css",
+    "styles/themes/newspaper.css",
     "styles/themes/parchment.css"
   ],
   "languages": [

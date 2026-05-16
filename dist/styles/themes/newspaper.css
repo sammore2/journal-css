@@ -1,0 +1,16 @@
+/* Newspaper Gazette Theme */
+.journal-theme-newspaper.journal-page-content, .journal-theme-newspaper .journal-page-content,
+.journal-theme-newspaper.editor-content, .journal-theme-newspaper .editor-content,
+.journal-theme-newspaper .ProseMirror { background: var(--newspaper-bg, #f2e6c8) !important; color: var(--newspaper-ink, #1e1200) !important; padding: 20px !important; }
+.newspaper-gazette { width: 100%; border: 5px double var(--newspaper-ink, #1e1200); padding: 20px; font-family: 'Playfair Display', serif; box-sizing: border-box; }
+.newspaper-gazette .header { text-align: center; border-bottom: 3px solid var(--newspaper-ink, #1e1200); padding-bottom: 10px; margin-bottom: 20px; }
+.newspaper-gazette .masthead .paper-name { font-size: 54px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; }
+.newspaper-gazette .layout-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+.newspaper-gazette .main-article { border-right: 1px solid var(--newspaper-ink, #1e1200); padding-right: 20px; }
+.newspaper-gazette .side-article { padding-left: 0px; }
+.newspaper-gazette .headline { font-weight: 900; font-size: 32px; line-height: 1.1; margin-top: 0; margin-bottom: 10px; text-align: center; }
+.newspaper-gazette .sub-headline { font-size: 20px; font-style: italic; margin-bottom: 15px; text-align: center; border-bottom: 1px dashed var(--newspaper-ink, #1e1200); padding-bottom: 10px; }
+.newspaper-gazette .body-text { font-family: 'Libre Baskerville', serif; line-height: 1.6; column-count: 2; column-gap: 20px; text-align: justify; }
+.newspaper-gazette .side-body { font-family: 'Libre Baskerville', serif; line-height: 1.5; font-size: 14px; text-align: justify; }
+.newspaper-gazette .advertisement { border: 2px solid var(--newspaper-ink, #1e1200); padding: 15px; text-align: center; margin-top: 20px; background: rgba(0,0,0,0.05); }
+.newspaper-gazette .drop-cap:first-letter { font-size: 3em; float: left; line-height: 0.8; margin-right: 5px; font-weight: bold; }
