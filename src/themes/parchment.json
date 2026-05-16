@@ -1,0 +1,22 @@
+{
+  "id": "parchment",
+  "name": "Pergaminho Antigo",
+  "description": "Textura envelhecida e tons sépia.",
+  "icon": "fas fa-scroll",
+  "cssPath": "modules/journal-css/styles/themes/parchment.css",
+  "layoutPath": "modules/journal-css/templates/layouts/parchment.hbs",
+  "variables": [
+    {
+      "key": "--parchment-bg",
+      "label": "Tom do Pergaminho",
+      "type": "color",
+      "default": "#fdf5e6"
+    },
+    {
+      "key": "--parchment-text",
+      "label": "Cor da Tinta",
+      "type": "color",
+      "default": "#3e2723"
+    }
+  ]
+}

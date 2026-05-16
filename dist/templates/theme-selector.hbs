@@ -1,0 +1,162 @@
+<section class="journal-css-selector-app">
+    <input type="hidden" name="theme" value="{{currentTheme}}">
+
+    <nav class="tabs" data-group="main">
+        <a class="item" data-tab="gallery"><i class="fas fa-th-large"></i> {{localize "JOURNAL_CSS.Tabs.Gallery"}}</a>
+        <a class="item" data-tab="templates"><i class="fas fa-magic"></i> Modelos</a>
+        <a class="item" data-tab="editor"><i class="fas fa-sliders-h"></i> {{localize "JOURNAL_CSS.Tabs.Editor"}}</a>
+        <a class="item" data-tab="install"><i class="fas fa-file-import"></i> {{localize "JOURNAL_CSS.Tabs.Install"}}</a>
+    </nav>
+    
+    <div class="selector-content">
+        <!-- GALLERY TAB -->
+        <div class="tab" data-group="main" data-tab="gallery">
+            <div class="theme-selection-area">
+                <div class="theme-grid">
+                    {{#each themes}}
+                    <div class="theme-card {{#if isActive}}active{{/if}}" 
+                         data-theme="{{id}}" 
+                         data-action="selectTheme">
+                        <div class="theme-icon">
+                            <i class="{{icon}}"></i>
+                        </div>
+                        <div class="theme-info">
+                            <span class="theme-name">{{localize name}}</span>
+                        </div>
+                        {{#if isUserTheme}}
+                        <div class="theme-actions">
+                            <button type="button" class="delete-btn" data-action="deleteTheme" data-theme="{{id}}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                        {{/if}}
+                        <div class="active-badge"><i class="fas fa-check"></i></div>
+                    </div>
+                    {{/each}}
+                </div>
+            </div>
+
+            <div class="quick-tweaks-area">
+                <h3><i class="fas fa-magic"></i> {{localize "JOURNAL_CSS.Settings.QuickTweaks.Label"}}</h3>
+                <div class="tweaks-grid">
+                    <div class="form-group">
+                        <label>{{localize "JOURNAL_CSS.Settings.FontSize.Label"}}</label>
+                        <div class="form-fields">
+                            <input type="range" name="fontSize" value="{{tweaks.fontSize}}" min="10" max="32" step="1">
+                            <span class="value-display">{{tweaks.fontSize}}px</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>{{localize "JOURNAL_CSS.Settings.FontFamily.Label"}}</label>
+                        <div class="form-fields">
+                            <select name="fontFamily">
+                                <option value="" {{#if (eq tweaks.fontFamily "")}}selected{{/if}}>{{localize "JOURNAL_CSS.Settings.FontFamily.Default"}}</option>
+                                <option value="serif" {{#if (eq tweaks.fontFamily "serif")}}selected{{/if}}>Serif</option>
+                                <option value="sans-serif" {{#if (eq tweaks.fontFamily "sans-serif")}}selected{{/if}}>Sans-Serif</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TEMPLATES TAB -->
+        <div class="tab" data-group="main" data-tab="templates">
+            <div class="templates-grid">
+                {{#each themes}}
+                    {{#if hasTemplate}}
+                    <div class="template-card" data-action="applyAtomicLayout" data-theme="{{id}}">
+                        <div class="template-preview {{id}}"></div>
+                        <div class="template-info">
+                            <h4>{{localize name}}</h4>
+                            <p>{{description}}</p>
+                        </div>
+                    </div>
+                    {{/if}}
+                {{/each}}
+            </div>
+        </div>
+
+        <!-- EDITOR TAB -->
+        <div class="tab" data-group="main" data-tab="editor">
+            {{#if hasVariables}}
+                <div class="visual-editor-area">
+                    <h3><i class="fas fa-edit"></i> {{localize "JOURNAL_CSS.Editor.Label"}}</h3>
+                    <p class="subtitle">{{localize "JOURNAL_CSS.Editor.Hint"}}</p>
+
+                    <div class="variables-grid">
+                        {{#each variables}}
+                        <div class="form-group">
+                            <label>{{localize label}}</label>
+                            <div class="form-fields">
+                                {{#if (eq type "color")}}
+                                    <input type="color" name="{{key}}" value="{{value}}">
+                                    <input type="text" value="{{value}}" readonly class="color-text">
+                                {{/if}}
+
+                                {{#if (eq type "range")}}
+                                    <input type="range" name="{{key}}" value="{{value}}" min="{{min}}" max="{{max}}" step="{{step}}">
+                                    <span class="value-display">{{value}}</span>
+                                {{/if}}
+
+                                {{#if (eq type "select")}}
+                                    <select name="{{key}}">
+                                        {{#each options}}
+                                        <option value="{{@key}}" {{#if (eq ../value @key)}}selected{{/if}}>{{this}}</option>
+                                        {{/each}}
+                                    </select>
+                                {{/if}}
+
+                                {{#if (eq type "text")}}
+                                    <input type="text" name="{{key}}" value="{{value}}">
+                                {{/if}}
+                            </div>
+                        </div>
+                        {{/each}}
+                    </div>
+                </div>
+            {{else}}
+                <div class="no-variables">
+                    <i class="fas fa-info-circle"></i>
+                    <p>{{localize "JOURNAL_CSS.Editor.NoVariables"}}</p>
+                </div>
+            {{/if}}
+
+            <div class="custom-css-area">
+                <h3><i class="fas fa-code"></i> {{localize "JOURNAL_CSS.Settings.CustomCSS.Label"}}</h3>
+                <textarea name="customCSS" spellcheck="false">{{customCSS}}</textarea>
+            </div>
+        </div>
+
+        <!-- INSTALL TAB -->
+        <div class="tab" data-group="main" data-tab="install">
+            <div class="install-area">
+                <i class="fas fa-cloud-upload-alt big-icon"></i>
+                <h3>{{localize "JOURNAL_CSS.Install.Label"}}</h3>
+                <p>{{localize "JOURNAL_CSS.Install.Hint"}}</p>
+                
+                <div class="install-buttons">
+                    <button type="button" data-action="installTheme" class="install-btn">
+                        <i class="fas fa-file-upload"></i> {{localize "JOURNAL_CSS.Actions.UploadFile"}}
+                    </button>
+
+                    {{#if isGM}}
+                    <button type="button" data-action="createTheme" class="create-btn">
+                        <i class="fas fa-plus"></i> Criar Novo Tema
+                    </button>
+                    {{/if}}
+                </div>
+
+                <div class="dev-info">
+                    <p><i class="fas fa-terminal"></i> {{localize "JOURNAL_CSS.Install.DevNote"}}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="sheet-footer">
+        <button type="submit" name="submit">
+            <i class="fas fa-save"></i> {{localize "JOURNAL_CSS.Actions.Save"}}
+        </button>
+    </footer>
+</section>

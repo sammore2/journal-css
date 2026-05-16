@@ -1,0 +1,16 @@
+/* Oakhaven Gazette Theme */
+.journal-theme-oakhaven.journal-page-content, .journal-theme-oakhaven .journal-page-content,
+.journal-theme-oakhaven.editor-content, .journal-theme-oakhaven .editor-content,
+.journal-theme-oakhaven .ProseMirror { background: var(--oakhaven-bg, #f2e6c8) !important; color: var(--oakhaven-ink, #1e1200) !important; padding: 20px !important; }
+.oakhaven-gazette { width: 100%; border: 5px double var(--oakhaven-ink, #1e1200); padding: 20px; font-family: 'Playfair Display', serif; box-sizing: border-box; }
+.oakhaven-gazette .header { text-align: center; border-bottom: 3px solid var(--oakhaven-ink, #1e1200); padding-bottom: 10px; margin-bottom: 20px; }
+.oakhaven-gazette .masthead .paper-name { font-size: 54px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; }
+.oakhaven-gazette .layout-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+.oakhaven-gazette .main-article { border-right: 1px solid var(--oakhaven-ink, #1e1200); padding-right: 20px; }
+.oakhaven-gazette .side-article { padding-left: 0px; }
+.oakhaven-gazette .headline { font-weight: 900; font-size: 32px; line-height: 1.1; margin-top: 0; margin-bottom: 10px; text-align: center; }
+.oakhaven-gazette .sub-headline { font-size: 20px; font-style: italic; margin-bottom: 15px; text-align: center; border-bottom: 1px dashed var(--oakhaven-ink, #1e1200); padding-bottom: 10px; }
+.oakhaven-gazette .body-text { font-family: 'Libre Baskerville', serif; line-height: 1.6; column-count: 2; column-gap: 20px; text-align: justify; }
+.oakhaven-gazette .side-body { font-family: 'Libre Baskerville', serif; line-height: 1.5; font-size: 14px; text-align: justify; }
+.oakhaven-gazette .advertisement { border: 2px solid var(--oakhaven-ink, #1e1200); padding: 15px; text-align: center; margin-top: 20px; background: rgba(0,0,0,0.05); }
+.oakhaven-gazette .drop-cap:first-letter { font-size: 3em; float: left; line-height: 0.8; margin-right: 5px; font-weight: bold; }

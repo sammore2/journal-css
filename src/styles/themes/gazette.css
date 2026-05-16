@@ -1,0 +1,100 @@
+/* Theme: Gazette (Old Newspaper)
+ * Scoped to .journal-theme-gazette
+ */
+
+.journal-theme-gazette {
+    --gazette-bg: #f9f4e8;
+    --gazette-text: #1a1a1a;
+    --gazette-accent: #333;
+    --gazette-border: #222;
+    --gazette-line: #ccc;
+    --gazette-font-body: 'Old Standard TT', 'Georgia', serif;
+    --gazette-font-head: 'Playfair Display', 'Times New Roman', serif;
+}
+
+/* Base Window Styling */
+.journal-theme-gazette .window-content {
+    background: var(--gazette-bg) !important;
+    background-image: url("https://www.transparenttextures.com/patterns/paper-fibers.png") !important;
+    color: var(--gazette-text);
+    font-family: var(--gazette-font-body);
+    box-shadow: inset 0 0 100px rgba(0,0,0,0.05);
+}
+
+/* Header (The Flag) */
+.journal-theme-gazette h1 {
+    text-align: center;
+    font-family: var(--gazette-font-head);
+    font-weight: 900;
+    font-size: 3.5em;
+    text-transform: uppercase;
+    border-top: 4px solid var(--gazette-border);
+    border-bottom: 1px solid var(--gazette-border);
+    margin: 20px 0 10px 0;
+    padding: 10px 0;
+    letter-spacing: -2px;
+}
+
+.journal-theme-gazette h2 {
+    font-family: var(--gazette-font-head);
+    border-bottom: 2px solid var(--gazette-border);
+    text-transform: uppercase;
+    font-size: 1.8em;
+    margin-top: 1.5em;
+    font-weight: bold;
+}
+
+/* Content Area */
+.journal-theme-gazette .journal-entry-content {
+    padding: 30px;
+    line-height: 1.5;
+}
+
+/* Drop Cap */
+.journal-theme-gazette p:first-of-type::first-letter {
+    float: left;
+    font-size: 5em;
+    line-height: 0.8;
+    padding: 10px 10px 0 0;
+    font-family: var(--gazette-font-head);
+    font-weight: bold;
+}
+
+/* Images: B&W Dithered Look */
+.journal-theme-gazette img {
+    filter: grayscale(1) contrast(1.5) brightness(0.9);
+    border: 1px solid #444;
+    padding: 4px;
+    background: white;
+    margin: 15px auto;
+    display: block;
+}
+
+/* Blockquotes as "Sidebars" */
+.journal-theme-gazette blockquote {
+    border: 1px solid var(--gazette-border);
+    background: rgba(0,0,0,0.02);
+    padding: 15px;
+    margin: 20px 0;
+    font-style: italic;
+    position: relative;
+}
+
+.journal-theme-gazette blockquote::before {
+    content: "LATEST NEWS";
+    position: absolute;
+    top: -10px;
+    left: 10px;
+    background: var(--gazette-bg);
+    padding: 0 5px;
+    font-size: 0.7em;
+    font-weight: bold;
+    font-style: normal;
+}
+
+/* Horizontal Rules */
+.journal-theme-gazette hr {
+    border: none;
+    border-top: 3px double var(--gazette-line);
+    margin: 2em 0;
+}
