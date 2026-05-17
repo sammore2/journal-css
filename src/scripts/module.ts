@@ -81,8 +81,33 @@ class ThemeRegistry {
       styleTag.id = `${MODULE_ID}-dynamic-themes`;
       document.head.appendChild(styleTag);
     }
+    const buttonCSS = `
+.journal-css-create-template-btn {
+  width: 100%;
+  margin-top: 5px;
+  background: rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--color-border-light-2, #c9c7b8);
+  border-radius: 3px;
+  padding: 5px 10px;
+  color: var(--color-text-light-highlight, #f0f0e0);
+  font-family: var(--font-primary, 'SignikaNegative');
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+.journal-css-create-template-btn:hover {
+  background: rgba(0, 0, 0, 0.2);
+  color: var(--color-shadow-primary, #ff6400);
+  border-color: var(--color-shadow-primary, #ff6400);
+  box-shadow: 0 0 5px var(--color-shadow-primary, #ff6400);
+}
+`;
     // Aggregate all embedded CSS from themes
-    styleTag.textContent = this.themes
+    styleTag.textContent = buttonCSS + "\n\n" + this.themes
       .filter(t => t.css)
       .map(t => `/* Theme: ${t.id} */\n${t.css}`)
       .join("\n\n");
@@ -94,6 +119,29 @@ class ThemeRegistry {
 
   static getThemeList() {
     return this.themes;
+  }
+
+  static layoutCache: Record<string, string> = {};
+
+  static async preloadLayouts() {
+    for (const theme of this.themes) {
+      if (theme.contentTemplate) {
+        this.layoutCache[theme.id] = theme.contentTemplate;
+      } else if (theme.layoutPath) {
+        try {
+          this.layoutCache[theme.id] = await (foundry as any).applications.handlebars.renderTemplate(theme.layoutPath, {});
+        } catch (err) {
+          console.error(`${MODULE_ID} | Failed to preload layout for ${theme.id}:`, err);
+        }
+      }
+    }
+  }
+
+  static getThemeLayoutSync(id: string): string | null {
+    if (this.layoutCache[id]) return this.layoutCache[id];
+    const theme = this.getTheme(id);
+    if (!theme) return null;
+    return theme.contentTemplate || `<h2>${theme.name}</h2><p>Modelo padrão injetado. Adicione conteúdo aqui.</p>`;
   }
 
   /**
@@ -271,13 +319,18 @@ class ThemeSelector extends (foundry as any).applications.api.ApplicationV2 {
     },
     saveSettings: async function(this: ThemeSelector, event: any, form: HTMLFormElement, formData: any) {
       const data = formData.object;
-      await this.document.setFlag(MODULE_ID, "theme", data.theme);
-      await this.document.setFlag(MODULE_ID, "customCSS", data.customCSS);
       const themeVars: Record<string, any> = {};
       Object.keys(data).forEach(key => { if (key.startsWith("--")) themeVars[key] = data[key]; });
-      await this.document.setFlag(MODULE_ID, "themeVars", themeVars);
       const tweaks = { fontSize: data.fontSize, fontFamily: data.fontFamily };
-      await this.document.setFlag(MODULE_ID, "tweaks", tweaks);
+
+      // Executa um update atômico único para evitar colisões de concorrência na re-renderização nativa do Foundry V14
+      const updateData = {
+        [`flags.${MODULE_ID}.theme`]: data.theme,
+        [`flags.${MODULE_ID}.customCSS`]: data.customCSS,
+        [`flags.${MODULE_ID}.themeVars`]: themeVars,
+        [`flags.${MODULE_ID}.tweaks`]: tweaks
+      };
+      await this.document.update(updateData);
       
       this._selectedThemeId = null;
       this.refreshJournalWindows();
@@ -324,7 +377,29 @@ class ThemeSelector extends (foundry as any).applications.api.ApplicationV2 {
     const theme = ThemeRegistry.getTheme(themeId);
     const pageName = theme ? theme.name : "Nova Página";
 
-    // 1. Identify the parent JournalEntry (The Codex / Foundry V14 Standard)
+    // 1. Se o seletor foi aberto de dentro de uma página existente (JournalEntryPage), atualiza a página atual em vez de duplicar!
+    if (this.document && this.document.documentName === "JournalEntryPage") {
+      console.log(`${MODULE_ID} | Atualizando página existente com modelo:`, this.document.id);
+      try {
+        const currentName = this.document.name;
+        const isDefaultName = currentName === "Nova Página" || currentName === "New Page" || currentName.startsWith("Página") || currentName.startsWith("Page") || currentName === "Texto" || currentName === "Text";
+        await this.document.update({
+          name: isDefaultName ? pageName : currentName,
+          "text.content": layoutHTML,
+          "text.format": 1, // HTML/ProseMirror
+          [`flags.${MODULE_ID}.theme`]: themeId
+        });
+        ui.notifications.info(`Modelo aplicado com sucesso à página "${this.document.name}".`);
+        this.close();
+        return;
+      } catch (err) {
+        console.error(`${MODULE_ID} | Erro ao atualizar a página existente:`, err);
+        ui.notifications.error(`Erro ao aplicar modelo: ${err.message}`);
+        return;
+      }
+    }
+
+    // 2. Caso contrário (se foi aberto pela janela principal do diário), identifica o JournalEntry pai e cria uma página nova
     let journal = this.document;
     if (journal && journal.documentName !== "JournalEntry") {
       if (journal.parent && journal.parent.documentName === "JournalEntry") {
@@ -570,7 +645,7 @@ function injectThemeButton(appEl: HTMLElement, appObj: any) {
   const btn = document.createElement("button");
   btn.type = "button";
   btn.classList.add("header-control", "journal-css-selector");
-  btn.innerHTML = '<i class="fas fa-wand-magic-sparkles"></i>';
+  btn.innerHTML = '<i class="fas fa-swatchbook"></i>';
   btn.title = "Modelos de Página";
   
   btn.onclick = (ev) => {
@@ -596,6 +671,73 @@ function injectThemeButton(appEl: HTMLElement, appObj: any) {
   if (closeBtn) closeBtn.before(btn);
   else header.appendChild(btn);
 }
+
+function injectTemplateSelectIntoCreateDialog(app: any, html: any) {
+  const element = html[0] || html;
+
+  // Verifica se é a janela/diálogo nativo de criar página de diário
+  const title = app.data?.title || app.title || app.options?.title || "";
+  if (!title.toLowerCase().includes("página") && !title.toLowerCase().includes("page")) return;
+
+  if (element.querySelector(`.${MODULE_ID}-template-select`)) return;
+
+  const typeSelect = element.querySelector("select[name='type']");
+  if (!typeSelect) return;
+
+  const typeFormGroup = typeSelect.closest(".form-group") || typeSelect.closest(".form-field");
+  if (!typeFormGroup) return;
+
+  const formGroup = document.createElement("div");
+  formGroup.classList.add("form-group");
+  formGroup.innerHTML = `
+    <label><i class="fas fa-swatchbook"></i> Modelo</label>
+    <div class="form-fields">
+      <select name="journal-css-template" class="${MODULE_ID}-template-select">
+        <option value="none">Padrão do Foundry (Em Branco)</option>
+        ${ThemeRegistry.getThemeList().map(t => `<option value="${t.id}">${t.name}</option>`).join("")}
+      </select>
+    </div>
+  `;
+
+  const select = formGroup.querySelector("select") as HTMLSelectElement;
+  const updatePending = () => {
+    (game as any)._pendingJournalCSSTemplate = { 
+      template: select.value, 
+      time: Date.now()
+    };
+    console.log(`${MODULE_ID} | Modelo agendado para criação:`, (game as any)._pendingJournalCSSTemplate);
+  };
+
+  select.addEventListener("change", updatePending);
+  updatePending(); // Inicializa com 'none'
+
+  typeFormGroup.after(formGroup);
+}
+
+Hooks.on("renderDialog", injectTemplateSelectIntoCreateDialog);
+Hooks.on("renderJournalEntryPageConfig", injectTemplateSelectIntoCreateDialog);
+
+Hooks.on("preCreateJournalEntryPage", (doc: any, data: any, options: any, userId: any) => {
+  const pending = (game as any)._pendingJournalCSSTemplate;
+  if (!pending) return;
+
+  if (Date.now() - pending.time > 30000) return;
+
+  if (pending.template !== "none") {
+    const themeId = pending.template;
+    console.log(`${MODULE_ID} | Interceptando preCreateJournalEntryPage para aplicar modelo:`, themeId);
+
+    const layoutHTML = ThemeRegistry.getThemeLayoutSync(themeId);
+    if (layoutHTML) {
+      doc.updateSource({
+        "text.content": layoutHTML,
+        "text.format": 1, // HTML/ProseMirror
+        [`flags.${MODULE_ID}.theme`]: themeId
+      });
+    }
+    delete (game as any)._pendingJournalCSSTemplate;
+  }
+});
 
 async function applyJournalTheme(sheet: any, themeOverride?: string, varsOverride?: Record<string, any>) {
   // Target the specific container for the page/content, not the whole window
@@ -665,16 +807,74 @@ async function applyJournalTheme(sheet: any, themeOverride?: string, varsOverrid
   }
 }
 
+function injectCreateByTemplateButton(appEl: HTMLElement, appObj: any) {
+  // Apenas injeta se a sheet for editável/GM tiver permissão
+  const isEditable = appObj.isEditable || appObj.options?.editable;
+  if (!isEditable) return;
+
+  // Verifica se é a janela principal de um JournalEntry (e não uma página solta)
+  const isJournal = appObj.document?.documentName === "JournalEntry";
+  if (!isJournal) return;
+
+  // Procura a barra lateral de páginas no DOM (V14 e V13 compat)
+  const sidebar = appEl.querySelector(".directory-sidebar, .journal-sidebar, .sidebar, .window-content .directory");
+  if (!sidebar) return;
+
+  if (appEl.querySelector(".journal-css-create-template-btn")) return;
+
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.classList.add("journal-css-create-template-btn");
+  btn.innerHTML = '<i class="fas fa-swatchbook"></i> Criar por Modelo';
+  btn.title = "Criar nova página a partir de um modelo pré-formatado";
+
+  btn.onclick = (ev) => {
+    ev.preventDefault();
+    ev.stopPropagation();
+
+    let doc = appObj?.document;
+    if (!doc && appEl.dataset.uuid) doc = (fromUuidSync as any)(appEl.dataset.uuid);
+
+    if (doc) {
+      const existingApp = Object.values(ui.windows).find((app: any) => app.id === "journal-theme-selector");
+      if (existingApp) {
+        (existingApp as any).render(true);
+        (existingApp as any).bringToFront();
+      } else {
+        const Cls = getThemeSelectorClass();
+        new Cls({ document: doc }).render(true);
+      }
+    }
+  };
+
+  // Tenta encontrar o botão nativo de criar página ou o footer/header da sidebar
+  const createPageBtn = sidebar.querySelector(".create-page, .new-page, [data-action='createPage']");
+  const footer = sidebar.querySelector(".directory-footer, .sidebar-footer");
+  const header = sidebar.querySelector(".directory-header, .sidebar-header");
+
+  if (createPageBtn) {
+    createPageBtn.after(btn);
+  } else if (footer) {
+    footer.appendChild(btn);
+  } else if (header) {
+    header.appendChild(btn);
+  } else {
+    sidebar.appendChild(btn);
+  }
+}
+
 Hooks.on("renderJournalSheet", (app: any, html: any) => {
   const element = html[0] || html;
   applyJournalTheme(app);
   injectThemeButton(element, app);
+  injectCreateByTemplateButton(element, app);
 });
 
 Hooks.on("renderJournalEntrySheet", (app: any, html: any) => {
   const element = html[0] || html;
   applyJournalTheme(app);
   injectThemeButton(element, app);
+  injectCreateByTemplateButton(element, app);
 });
 
 Hooks.on("renderJournalPageSheet", (app: any, html: any) => {
@@ -729,12 +929,16 @@ Hooks.on("updateJournalEntry", (doc: any, change: any, options: any, userId: any
   }
 });
 
-Hooks.on("ready", () => {
+Hooks.on("ready", async () => {
+  await ThemeRegistry.preloadLayouts();
   // Re-apply to all open journals
   Object.values(ui.windows).forEach((app: any) => {
     if (app.document?.documentName?.startsWith("JournalEntry")) {
       applyJournalTheme(app);
-      if (app.element) injectThemeButton(app.element, app);
+      if (app.element) {
+        injectThemeButton(app.element, app);
+        injectCreateByTemplateButton(app.element, app);
+      }
     }
   });
 });
