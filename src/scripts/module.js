@@ -426,6 +426,13 @@ function getThemeSelectorClass() {
 }
 Hooks.once("init", async () => {
     console.log(`${MODULE_ID} | Initializing Journal CSS V3`);
+
+    // Load Google Fonts via link tag instead of CSS @import to avoid CSS cascade issues
+    const fontLink = document.createElement("link");
+    fontLink.rel = "stylesheet";
+    fontLink.href = "https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=JetBrains+Mono&family=Caveat:wght@500&family=Dancing+Script:wght@600&family=Playfair+Display:wght@400;900&family=Libre+Baskerville:wght@400;700&display=swap";
+    document.head.appendChild(fontLink);
+
     // Register Handlebars Helpers
     Handlebars.registerHelper("eq", (a, b) => a === b);
     // Register Settings
@@ -507,8 +514,11 @@ async function applyJournalTheme(sheet, themeOverride, varsOverride) {
     // Inherit theme from parent if this is a page
     const parentTheme = doc.parent?.getFlag(MODULE_ID, "theme");
     const selectedTheme = themeOverride || doc.getFlag(MODULE_ID, "theme") || parentTheme || "none";
-    // Find the content container (the actual "sheet" or "page")
-    const targetEl = element.querySelector(".journal-page-content, .editor-content, .prosemirror") || element;
+    // Find the content container (the actual "sheet" or "page") - never fall back to root element
+    const contentSelectors = ".journal-page-content, .editor-content, .prosemirror, .journal-entry-page, .journal-entry-pages, .page-content, .editor-container";
+    let targetEl = element.querySelector(contentSelectors);
+    if (!targetEl) targetEl = element.querySelector(".window-content");
+    if (!targetEl) return; // no content container found, skip to avoid leaking theme classes to the entire window
     targetEl.classList.forEach((cls) => { if (cls.startsWith('journal-theme-'))
         targetEl.classList.remove(cls); });
     if (selectedTheme !== "none")
@@ -516,7 +526,7 @@ async function applyJournalTheme(sheet, themeOverride, varsOverride) {
     const parentVars = doc.parent?.getFlag(MODULE_ID, "themeVars") || {};
     const themeVars = varsOverride || doc.getFlag(MODULE_ID, "themeVars") || parentVars || {};
     ThemeRegistry.applyThemeVariables(targetEl, selectedTheme, themeVars);
-    const contentEl = element.querySelector(".ProseMirror, .editor-content, .page-content");
+    const contentEl = targetEl.querySelector(".ProseMirror, .editor-content, .page-content") || targetEl;
     if (!contentEl)
         return;
     // Legacy Tweaks (Compat)
@@ -529,14 +539,14 @@ async function applyJournalTheme(sheet, themeOverride, varsOverride) {
         contentEl.style.textAlign = tweaks.textAlign;
     if (tweaks.fontFamily)
         contentEl.style.fontFamily = tweaks.fontFamily;
-    // Custom CSS
+    // Custom CSS - scoped inside the content container, not the root element
     const customCSS = doc.getFlag(MODULE_ID, "customCSS") || doc.parent?.getFlag(MODULE_ID, "customCSS");
     let styleTag = element.querySelector(`#${MODULE_ID}-custom-style`);
     if (customCSS) {
         if (!styleTag) {
             styleTag = document.createElement("style");
             styleTag.id = `${MODULE_ID}-custom-style`;
-            element.appendChild(styleTag);
+            targetEl.appendChild(styleTag);
         }
         styleTag.textContent = customCSS;
     }

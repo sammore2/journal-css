@@ -584,6 +584,12 @@ function getThemeSelectorClass() {
 Hooks.once("init", async () => {
   console.log(`${MODULE_ID} | Initializing Journal CSS V3`);
 
+  // Load Google Fonts via link tag instead of CSS @import to avoid CSS cascade issues
+  const fontLink = document.createElement("link");
+  fontLink.rel = "stylesheet";
+  fontLink.href = "https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=JetBrains+Mono&family=Caveat:wght@500&family=Dancing+Script:wght@600&family=Playfair+Display:wght@400;900&family=Libre+Baskerville:wght@400;700&display=swap";
+  document.head.appendChild(fontLink);
+
   // Register Handlebars Helpers
   Handlebars.registerHelper("eq", (a, b) => a === b);
 
@@ -751,8 +757,11 @@ async function applyJournalTheme(sheet: any, themeOverride?: string, varsOverrid
   const parentTheme = doc.parent?.getFlag(MODULE_ID, "theme");
   const selectedTheme = themeOverride || doc.getFlag(MODULE_ID, "theme") || parentTheme || "none";
   
-  // Find the content container (the actual "sheet" or "page")
-  const targetEl = element.querySelector(".journal-entry-page, .journal-entry-pages, .editor-container, .journal-page-content, .page-content, .editor-content, .prosemirror, .ProseMirror") as HTMLElement || element;
+  // Find the content container - never fall back to root element to avoid leaking theme classes
+  const contentSelectors = ".journal-entry-page, .journal-entry-pages, .editor-container, .journal-page-content, .page-content, .editor-content, .prosemirror, .ProseMirror";
+  let targetEl = element.querySelector(contentSelectors) as HTMLElement;
+  if (!targetEl) targetEl = element.querySelector(".window-content") as HTMLElement;
+  if (!targetEl) return; // no content container found, skip safely
 
   targetEl.classList.forEach((cls: string) => { if (cls.startsWith('journal-theme-')) targetEl.classList.remove(cls); });
   if (selectedTheme !== "none") targetEl.classList.add(`journal-theme-${selectedTheme}`);
@@ -762,8 +771,7 @@ async function applyJournalTheme(sheet: any, themeOverride?: string, varsOverrid
   
   ThemeRegistry.applyThemeVariables(targetEl, selectedTheme, themeVars);
 
-  const contentEl = element.querySelector(".ProseMirror, .editor-content, .page-content, .journal-page-content") as HTMLElement | null;
-  if (!contentEl) return;
+  const contentEl = (targetEl.querySelector(".ProseMirror, .editor-content, .page-content, .journal-page-content") || targetEl) as HTMLElement;
 
   // Legacy Tweaks (Compat)
   const tweaks = doc.getFlag(MODULE_ID, "tweaks") || doc.parent?.getFlag(MODULE_ID, "tweaks") || {};
@@ -772,28 +780,26 @@ async function applyJournalTheme(sheet: any, themeOverride?: string, varsOverrid
   if (tweaks.textAlign) contentEl.style.textAlign = tweaks.textAlign;
   if (tweaks.fontFamily) contentEl.style.fontFamily = tweaks.fontFamily;
 
-  // Custom CSS
+  // Custom CSS - scoped inside the content container, not the root element
   const customCSS = doc.getFlag(MODULE_ID, "customCSS") || doc.parent?.getFlag(MODULE_ID, "customCSS");
   let styleTag = element.querySelector(`#${MODULE_ID}-custom-style`) as HTMLStyleElement;
   if (customCSS) {
     if (!styleTag) {
       styleTag = document.createElement("style");
       styleTag.id = `${MODULE_ID}-custom-style`;
-      element.appendChild(styleTag);
+      targetEl.appendChild(styleTag);
     }
     styleTag.textContent = customCSS;
   } else if (styleTag) styleTag.remove();
 
-  // Configura um MutationObserver ultraleve no element para interceptar quando o Foundry V14 alterna dinamicamente para o modo de edição (ProseMirror)
-  if (!(element as any)._journalThemeObserver) {
+  // Configura um MutationObserver no content container para quando o Foundry alternar para edição (ProseMirror)
+  if (!(targetEl as any)._journalThemeObserver) {
     const observer = new MutationObserver((mutations) => {
       for (const m of mutations) {
         if (m.addedNodes.length > 0) {
-          // Se algum nó adicionado for o editor ProseMirror ou contiver o editor, re-aplica a classe do tema
           const addedEditor = Array.from(m.addedNodes).find(n => (n as HTMLElement).classList && ((n as HTMLElement).classList.contains("editor") || (n as HTMLElement).classList.contains("ProseMirror") || (n as HTMLElement).classList.contains("editor-container") || (n as HTMLElement).querySelector(".ProseMirror, .editor, .editor-container")));
           if (addedEditor) {
-            // Re-aplica as classes e variáveis no novo elemento do editor
-            const newTarget = element.querySelector(".journal-entry-page, .journal-entry-pages, .editor-container, .journal-page-content, .page-content, .editor-content, .prosemirror, .ProseMirror") as HTMLElement || element;
+            const newTarget = (targetEl.querySelector(contentSelectors) || targetEl) as HTMLElement;
             newTarget.classList.forEach((cls: string) => { if (cls.startsWith('journal-theme-')) newTarget.classList.remove(cls); });
             if (selectedTheme !== "none") newTarget.classList.add(`journal-theme-${selectedTheme}`);
             ThemeRegistry.applyThemeVariables(newTarget, selectedTheme, themeVars);
@@ -802,8 +808,8 @@ async function applyJournalTheme(sheet: any, themeOverride?: string, varsOverrid
         }
       }
     });
-    observer.observe(element, { childList: true, subtree: true });
-    (element as any)._journalThemeObserver = observer;
+    observer.observe(targetEl, { childList: true, subtree: true });
+    (targetEl as any)._journalThemeObserver = observer;
   }
 }
 

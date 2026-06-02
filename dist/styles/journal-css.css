@@ -1,9 +1,5 @@
 /* Journal CSS - Premium UI/UX Design V3 */
 
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=JetBrains+Mono&display=swap');
-@import url('themes/parchment.css');
-@import url('themes/newspaper.css');
-
 #journal-theme-selector {
     --glass: rgba(18, 18, 24, 0.96);
     --glass-border: rgba(255, 255, 255, 0.1);
@@ -64,29 +60,29 @@
 }
 
 /* Content Area */
-.selector-content {
+.journal-css-selector-app .selector-content {
     flex: 1;
     overflow-y: auto;
     padding: 20px;
 }
 
-.tab[data-tab] {
+.journal-css-selector-app .tab[data-tab] {
     display: none;
 }
 
-.tab.active {
+.journal-css-selector-app .tab.active {
     display: block;
 }
 
 /* Theme Cards */
-.theme-grid {
+#journal-theme-selector .theme-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 12px;
     margin-bottom: 20px;
 }
 
-.theme-card {
+#journal-theme-selector .theme-card {
     background: var(--bg-card);
     border: 1px solid var(--glass-border);
     border-radius: 8px;
@@ -97,23 +93,23 @@
     position: relative;
 }
 
-.theme-card:hover {
+#journal-theme-selector .theme-card:hover {
     border-color: var(--accent);
     background: rgba(255, 255, 255, 0.05);
 }
 
-.theme-card.active {
+#journal-theme-selector .theme-card.active {
     border-color: var(--accent);
     box-shadow: 0 0 10px rgba(255, 123, 0, 0.3);
 }
 
-.theme-icon {
+#journal-theme-selector .theme-icon {
     font-size: 1.5rem;
     margin-bottom: 5px;
     color: var(--accent);
 }
 
-.theme-name {
+#journal-theme-selector .theme-name {
     font-size: 0.75rem;
     font-weight: 600;
     display: block;
@@ -122,11 +118,11 @@
     white-space: nowrap;
 }
 
-.theme-actions {
+#journal-theme-selector .theme-actions {
     margin-left: auto;
 }
 
-.delete-btn {
+#journal-theme-selector .delete-btn {
     background: none;
     border: none;
     color: #ff4444;
@@ -134,26 +130,26 @@
     opacity: 0.6;
 }
 
-.delete-btn:hover {
+#journal-theme-selector .delete-btn:hover {
     opacity: 1;
 }
 
 /* Visual Editor */
-.variables-grid {
+#journal-theme-selector .variables-grid {
     display: flex;
     flex-direction: column;
     gap: 10px;
     margin-top: 15px;
 }
 
-.form-group {
+#journal-theme-selector .form-group {
     background: var(--bg-card);
     padding: 10px 15px;
     border-radius: 8px;
     border: 1px solid var(--glass-border);
 }
 
-.form-group label {
+#journal-theme-selector .form-group label {
     display: block;
     font-size: 0.7rem;
     text-transform: uppercase;
@@ -162,14 +158,14 @@
     font-weight: 600;
 }
 
-.form-fields {
+#journal-theme-selector .form-fields {
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
 /* Inputs */
-input[type="color"] {
+#journal-theme-selector input[type="color"] {
     width: 30px;
     height: 30px;
     padding: 0;
@@ -178,7 +174,7 @@ input[type="color"] {
     cursor: pointer;
 }
 
-.color-text {
+#journal-theme-selector .color-text {
     background: var(--bg-input);
     border: none;
     color: var(--text-primary);
@@ -189,7 +185,7 @@ input[type="color"] {
     width: 80px;
 }
 
-input[type="range"] {
+#journal-theme-selector input[type="range"] {
     flex: 1;
     height: 4px;
     background: var(--bg-input);
@@ -197,7 +193,7 @@ input[type="range"] {
     cursor: pointer;
 }
 
-.value-display {
+#journal-theme-selector .value-display {
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.75rem;
     color: var(--accent);
@@ -205,7 +201,7 @@ input[type="range"] {
     text-align: right;
 }
 
-textarea {
+#journal-theme-selector textarea {
     width: 100%;
     height: 120px;
     background: var(--bg-input) !important;
@@ -218,7 +214,7 @@ textarea {
 }
 
 /* Install Area */
-.install-area {
+#journal-theme-selector .install-area {
     text-align: center;
     padding: 40px 20px;
     background: var(--bg-card);
@@ -226,7 +222,7 @@ textarea {
     border: 2px dashed var(--glass-border);
 }
 
-.install-buttons {
+#journal-theme-selector .install-buttons {
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -234,14 +230,15 @@ textarea {
     margin: 20px 0;
 }
 
-.big-icon {
+#journal-theme-selector .big-icon {
     font-size: 3rem;
     color: var(--accent);
     margin-bottom: 20px;
     opacity: 0.5;
 }
 
-.install-btn, .create-btn {
+#journal-theme-selector .install-btn,
+#journal-theme-selector .create-btn {
     width: 250px;
     padding: 12px 20px !important;
     font-weight: 700 !important;
@@ -251,22 +248,22 @@ textarea {
     border: none !important;
 }
 
-.install-btn {
+#journal-theme-selector .install-btn {
     background: var(--accent) !important;
     color: #111 !important;
 }
 
-.create-btn {
+#journal-theme-selector .create-btn {
     background: rgba(255, 255, 255, 0.1) !important;
     color: #fff !important;
     border: 1px solid var(--glass-border) !important;
 }
 
-.create-btn:hover {
+#journal-theme-selector .create-btn:hover {
     background: rgba(255, 255, 255, 0.2) !important;
 }
 
-.dev-info {
+#journal-theme-selector .dev-info {
     font-size: 0.75rem;
     color: var(--text-secondary);
     background: rgba(0, 0, 0, 0.2);
@@ -276,7 +273,7 @@ textarea {
 }
 
 /* Layout Button Area */
-.theme-layout-area {
+#journal-theme-selector .theme-layout-area {
     margin: 20px 0;
     padding: 15px;
     background: rgba(255, 123, 0, 0.05);
@@ -285,19 +282,19 @@ textarea {
     text-align: center;
 }
 
-.theme-layout-area h3 {
+#journal-theme-selector .theme-layout-area h3 {
     margin: 0;
     font-size: 0.9rem;
     color: var(--accent);
 }
 
-.theme-layout-area .subtitle {
+#journal-theme-selector .theme-layout-area .subtitle {
     font-size: 0.75rem;
     color: var(--text-secondary);
     margin-bottom: 12px;
 }
 
-.layout-btn {
+#journal-theme-selector .layout-btn {
     background: var(--accent) !important;
     color: #111 !important;
     border: none !important;
@@ -308,20 +305,20 @@ textarea {
     transition: all 0.2s;
 }
 
-.layout-btn:hover {
+#journal-theme-selector .layout-btn:hover {
     transform: scale(1.02);
     filter: brightness(1.2);
 }
 
 /* Templates Tab */
-.templates-grid {
+#journal-theme-selector .templates-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 15px;
     padding: 10px;
 }
 
-.template-card {
+#journal-theme-selector .template-card {
     background: var(--bg-card);
     border: 1px solid var(--glass-border);
     border-radius: 10px;
@@ -332,45 +329,45 @@ textarea {
     flex-direction: column;
 }
 
-.template-card:hover {
+#journal-theme-selector .template-card:hover {
     border-color: var(--accent);
     transform: translateY(-2px);
     box-shadow: 0 4px 15px rgba(0,0,0,0.3);
 }
 
-.template-preview {
+#journal-theme-selector .template-preview {
     height: 100px;
     background-size: cover;
     background-position: center;
     border-bottom: 1px solid var(--glass-border);
 }
 
-.template-preview.newspaper {
+#journal-theme-selector .template-preview.newspaper {
     background-color: #f2e6c8;
     background-image: url("https://www.transparenttextures.com/patterns/pinstriped-suit.png");
 }
 
-.template-preview.parchment {
+#journal-theme-selector .template-preview.parchment {
     background-color: #fdf5e6;
     background-image: url("https://www.transparenttextures.com/patterns/handmade-paper.png");
 }
 
-.template-preview.none {
+#journal-theme-selector .template-preview.none {
     background-color: #333;
 }
 
-.template-info {
+#journal-theme-selector .template-info {
     padding: 12px;
     flex: 1;
 }
 
-.template-info h4 {
+#journal-theme-selector .template-info h4 {
     margin: 0 0 5px;
     color: var(--accent);
     font-size: 0.9rem;
 }
 
-.template-info p {
+#journal-theme-selector .template-info p {
     margin: 0;
     font-size: 0.7rem;
     color: var(--text-secondary);
@@ -416,7 +413,7 @@ textarea {
 }
 
 /* Footer */
-.sheet-footer {
+#journal-theme-selector .sheet-footer {
     padding: 15px 20px;
     background: rgba(0, 0, 0, 0.3);
     border-top: 1px solid var(--glass-border);
@@ -424,7 +421,7 @@ textarea {
     justify-content: flex-end;
 }
 
-.sheet-footer button {
+#journal-theme-selector .sheet-footer button {
     background: var(--accent) !important;
     color: #111 !important;
     border: none !important;
@@ -435,7 +432,7 @@ textarea {
     transition: transform 0.2s;
 }
 
-.sheet-footer button:hover {
+#journal-theme-selector .sheet-footer button:hover {
     transform: translateY(-2px);
     filter: brightness(1.1);
 }
