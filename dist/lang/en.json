@@ -35,5 +35,10 @@
   "JOURNAL_CSS.Editor.NoVariables": "This theme does not have editable variables.",
   "JOURNAL_CSS.Install.Label": "New Design Template",
   "JOURNAL_CSS.Install.Hint": "Upload a .json file to add a new theme to your world.",
-  "JOURNAL_CSS.Install.DevNote": "The file must follow the ThemeV3 schema."
+  "JOURNAL_CSS.Install.DevNote": "The file must follow the ThemeV3 schema.",
+  "JOURNAL_CSS.Premium.RequiresCore": "Storyteller Cinema is required to manage premium keys. Install it from the Foundry module manager.",
+  "JOURNAL_CSS.Settings.AllowPlayerThemes.Name": "Allow Players to Customise Themes",
+  "JOURNAL_CSS.Settings.AllowPlayerThemes.Hint": "If enabled, players can install and manage custom themes in this world.",
+  "JOURNAL_CSS.Settings.LoadGoogleFonts.Name": "Load Google Fonts",
+  "JOURNAL_CSS.Settings.LoadGoogleFonts.Hint": "Load Google Fonts for typography styles. Disable this if you want to use local system fonts only."
 }

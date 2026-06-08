@@ -1,5 +1,6 @@
 {
   "id": "parchment",
+  "tier": "free",
   "name": "Pergaminho Antigo",
   "description": "Textura envelhecida e tons sépia.",
   "icon": "fas fa-scroll",

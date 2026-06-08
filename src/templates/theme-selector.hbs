@@ -6,6 +6,11 @@
         <a class="item" data-tab="templates"><i class="fas fa-magic"></i> Modelos</a>
         <a class="item" data-tab="editor"><i class="fas fa-sliders-h"></i> {{localize "JOURNAL_CSS.Tabs.Editor"}}</a>
         <a class="item" data-tab="install"><i class="fas fa-file-import"></i> {{localize "JOURNAL_CSS.Tabs.Install"}}</a>
+        {{#if isPremiumActive}}
+        <span class="premium-badge" style="margin-left:auto;padding:2px 10px;background:linear-gradient(90deg,#b47fff,#7c3aed);border-radius:20px;color:#fff;font-size:11px;font-weight:bold;align-self:center">
+            <i class="fas fa-crown"></i> Premium
+        </span>
+        {{/if}}
     </nav>
     
     <div class="selector-content">
@@ -14,9 +19,15 @@
             <div class="theme-selection-area">
                 <div class="theme-grid">
                     {{#each themes}}
-                    <div class="theme-card {{#if isActive}}active{{/if}}" 
+                    <div class="theme-card {{#if isActive}}active{{/if}} {{#if isLocked}}locked{{/if}}" 
                          data-theme="{{id}}" 
-                         data-action="selectTheme">
+                         {{#unless isLocked}}data-action="selectTheme"{{/unless}}>
+                        {{#if isLocked}}
+                        <div class="theme-lock-overlay">
+                            <i class="fas fa-lock"></i>
+                            <span>Premium</span>
+                        </div>
+                        {{/if}}
                         <div class="theme-icon">
                             <i class="{{icon}}"></i>
                         </div>

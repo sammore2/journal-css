@@ -1,6 +1,53 @@
 [
   {
+    "id": "cyberpunk",
+    "tier": "cyberpunk-neon",
+    "name": "Cyberpunk Ledger",
+    "description": "Estética futurista de neon, retroiluminação ciberespacial e grids de alta tecnologia.",
+    "icon": "fas fa-microchip",
+    "css": ".journal-theme-cyberpunk { background: #0c0b11 !important; color: #00ffcc !important; font-family: 'JetBrains Mono', monospace !important; border: 2px solid #ff007f !important; text-shadow: 0 0 5px #00ffcc !important; padding: 20px !important; } .journal-theme-cyberpunk h1, .journal-theme-cyberpunk h2 { color: #ff007f !important; text-shadow: 0 0 8px #ff007f !important; border-bottom: 1px solid #00ffcc !important; }",
+    "contentTemplate": "<div class=\"journal-theme-cyberpunk\"><h1>[ SYSTEM ONLINE ]</h1><p>Diretriz de dados carregada com sucesso. Modifique esta página ciberespacial.</p></div>",
+    "variables": [
+      {
+        "key": "--cyber-bg",
+        "label": "Fundo Neon",
+        "type": "color",
+        "default": "#0c0b11"
+      },
+      {
+        "key": "--cyber-accent",
+        "label": "Cor de Destaque",
+        "type": "color",
+        "default": "#ff007f"
+      }
+    ]
+  },
+  {
+    "id": "eldritch",
+    "tier": "eldritch-abyss",
+    "name": "Eldritch Chronicle",
+    "description": "Pergaminho profano envolto em sombras sussurrantes e runas arcanas esverdeadas.",
+    "icon": "fas fa-skull",
+    "css": ".journal-theme-eldritch { background: #070e0a !important; color: #7fff00 !important; font-family: 'Dancing Script', cursive !important; border: 2px solid #2e8b57 !important; text-shadow: 0 0 5px #7fff00 !important; padding: 20px !important; } .journal-theme-eldritch h1, .journal-theme-eldritch h2 { color: #adff2f !important; text-shadow: 0 0 10px #7fff00 !important; }",
+    "contentTemplate": "<div class=\"journal-theme-eldritch\"><h1>* Sussurros do Abismo *</h1><p>Runas antigas começam a pulsar... Adicione sua crônica profana aqui.</p></div>",
+    "variables": [
+      {
+        "key": "--eldritch-bg",
+        "label": "Cor do Abismo",
+        "type": "color",
+        "default": "#070e0a"
+      },
+      {
+        "key": "--eldritch-glow",
+        "label": "Brilho Rúnico",
+        "type": "color",
+        "default": "#7fff00"
+      }
+    ]
+  },
+  {
     "id": "newspaper",
+    "tier": "free",
     "name": "Newspaper Gazette",
     "description": "Layout editorial clássico com colunas e cabeçalho de jornal.",
     "icon": "fas fa-newspaper",
@@ -30,6 +77,7 @@
   },
   {
     "id": "parchment",
+    "tier": "free",
     "name": "Pergaminho Antigo",
     "description": "Textura envelhecida e tons sépia.",
     "icon": "fas fa-scroll",

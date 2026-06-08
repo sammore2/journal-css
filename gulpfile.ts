@@ -33,7 +33,7 @@ gulp.task('build', gulp.parallel('compile', 'copy'));
 
 
 // Automatic Deploy Configuration for Foundry VTT
-const MODULEPATH = "D:/FoundryVTT-WindowsPortable-14.359/Data/modules/journal-css/"
+const MODULEPATH = "D:/FoundryNode/Data/modules/journal-css/"
 
 gulp.task('foundry', () => {
   return gulp.src('dist/**')

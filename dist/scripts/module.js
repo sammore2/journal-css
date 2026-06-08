@@ -5,6 +5,58 @@
 /// <reference path="../../node_modules/@league-of-foundry-developers/foundry-vtt-types/src/index.d.mts" />
 const MODULE_ID = "journal-css";
 /**
+ * Lê a licença do Storyteller Cinema do localStorage do Foundry e retorna os tiers ativos.
+ * Funciona sem dependência direta do módulo core.
+ */
+class LicenseManager {
+    static getActiveTiers() {
+        try {
+            // Lê tanto a chave local do journal-css quanto a chave compartilhada do storyteller-cinema
+            const localRaw = game.settings.storage?.get("client")?.[`${MODULE_ID}.premiumKeys`];
+            const stcRaw = game.settings.storage?.get("client")?.["storyteller-cinema.premiumKeys"];
+            const localKeys = localRaw ? JSON.parse(localRaw) : [];
+            const stcKeys = stcRaw ? JSON.parse(stcRaw) : [];
+            const allKeys = [...localKeys, ...stcKeys];
+            if (!allKeys || allKeys.length === 0)
+                return ["free"];
+            // Presença de qualquer chave válida ativa o tier "premium"
+            return ["free", "premium"];
+        }
+        catch {
+            return ["free"];
+        }
+    }
+    static hasTier(tier) {
+        if (!tier || tier === "free")
+            return true;
+        return LicenseManager.getActiveTiers().includes(tier);
+    }
+    static getLocalKeys() {
+        try {
+            const localRaw = game.settings.storage?.get("client")?.[`${MODULE_ID}.premiumKeys`];
+            return localRaw ? JSON.parse(localRaw) : [];
+        }
+        catch {
+            return [];
+        }
+    }
+    static async addLocalKey(key) {
+        const keys = this.getLocalKeys();
+        if (keys.includes(key))
+            return false;
+        keys.push(key);
+        // Salva nas configurações locais (client-scope) usando a API de settings do Foundry
+        await game.settings.set(MODULE_ID, "premiumKeys", keys);
+        return true;
+    }
+    static async removeLocalKey(key) {
+        const keys = this.getLocalKeys();
+        const filtered = keys.filter(k => k !== key);
+        await game.settings.set(MODULE_ID, "premiumKeys", filtered);
+        return true;
+    }
+}
+/**
  * Registry to handle theme definitions and loading from JSON
  */
 class ThemeRegistry {
@@ -162,7 +214,8 @@ class ThemeSelector extends foundry.applications.api.ApplicationV2 {
     _selectedThemeId = null;
     _hasClickDelegation = false;
     _tabsInitialized = false;
-    _isApplyingLayout = false;
+    static _isApplyingLayout = false;
+    static _isCreatingTheme = false;
     constructor(options = {}) {
         super(options);
         const doc = options.document;
@@ -242,13 +295,17 @@ class ThemeSelector extends foundry.applications.api.ApplicationV2 {
             };
             input.click();
         },
-        createTheme: async function () {
-            if (!game.user.isGM)
+        createTheme: async function (event) {
+            if (ThemeSelector._isCreatingTheme)
                 return;
-            // Simple prompt for now, could be a full form later
-            const themeId = await foundry.applications.api.DialogV2.prompt({
-                window: { title: "Novo Tema" },
-                content: `
+            ThemeSelector._isCreatingTheme = true;
+            try {
+                if (!game.user.isGM)
+                    return;
+                // Simple prompt for now, could be a full form later
+                const themeId = await foundry.applications.api.DialogV2.prompt({
+                    window: { title: "Novo Tema" },
+                    content: `
           <div class="form-group">
             <label>ID do Tema (unico, sem espaços)</label>
             <input type="text" id="new-theme-id" placeholder="meu-tema-fantasia">
@@ -258,29 +315,34 @@ class ThemeSelector extends foundry.applications.api.ApplicationV2 {
             <input type="text" id="new-theme-name" placeholder="Manuscrito Real">
           </div>
         `,
-                ok: {
-                    label: "Criar Estrutura",
-                    callback: (event, button, html) => {
-                        return {
-                            id: html.querySelector("#new-theme-id").value,
-                            name: html.querySelector("#new-theme-name").value
-                        };
+                    ok: {
+                        label: "Criar Estrutura",
+                        callback: (event, button, dialog) => {
+                            const form = button.form;
+                            return {
+                                id: form.querySelector("#new-theme-id").value,
+                                name: form.querySelector("#new-theme-name").value
+                            };
+                        }
                     }
+                });
+                if (themeId && themeId.id) {
+                    const newTheme = {
+                        id: themeId.id,
+                        name: themeId.name,
+                        icon: "fas fa-feather-alt",
+                        css: `.journal-theme-${themeId.id} { background: #fff; color: #000; }`,
+                        contentTemplate: `<h2>${themeId.name}</h2><p>Lorem ipsum dolor sit amet...</p>`,
+                        variables: []
+                    };
+                    const userThemes = game.settings.get(MODULE_ID, "userThemes") || [];
+                    userThemes.push(newTheme);
+                    await game.settings.set(MODULE_ID, "userThemes", userThemes);
+                    this.render(true);
                 }
-            });
-            if (themeId && themeId.id) {
-                const newTheme = {
-                    id: themeId.id,
-                    name: themeId.name,
-                    icon: "fas fa-feather-alt",
-                    css: `.journal-theme-${themeId.id} { background: #fff; color: #000; }`,
-                    contentTemplate: `<h2>${themeId.name}</h2><p>Lorem ipsum dolor sit amet...</p>`,
-                    variables: []
-                };
-                const userThemes = game.settings.get(MODULE_ID, "userThemes") || [];
-                userThemes.push(newTheme);
-                await game.settings.set(MODULE_ID, "userThemes", userThemes);
-                this.render(true);
+            }
+            finally {
+                ThemeSelector._isCreatingTheme = false;
             }
         },
         saveSettings: async function (event, form, formData) {
@@ -302,9 +364,9 @@ class ThemeSelector extends foundry.applications.api.ApplicationV2 {
             ui.notifications.info(game.i18n.localize("JOURNAL_CSS.Notifications.SettingsSaved"));
         },
         applyAtomicLayout: async function (event, target) {
-            if (this._isApplyingLayout)
+            if (ThemeSelector._isApplyingLayout)
                 return;
-            this._isApplyingLayout = true;
+            ThemeSelector._isApplyingLayout = true;
             try {
                 const themeId = target.getAttribute("data-theme");
                 console.log(`${MODULE_ID} | Action: applyAtomicLayout | themeId:`, themeId);
@@ -324,7 +386,7 @@ class ThemeSelector extends foundry.applications.api.ApplicationV2 {
                 await this._applyLayout(themeId);
             }
             finally {
-                this._isApplyingLayout = false;
+                ThemeSelector._isApplyingLayout = false;
             }
         }
     };
@@ -420,7 +482,7 @@ class ThemeSelector extends foundry.applications.api.ApplicationV2 {
             resizable: true,
             controls: []
         },
-        position: { width: 550, height: 750 },
+        position: { width: 650, height: 780 },
         form: {
             handler: ThemeSelector.ACTIONS.saveSettings,
             submitOnChange: false,
@@ -447,12 +509,19 @@ class ThemeSelector extends foundry.applications.api.ApplicationV2 {
         if (ThemeRegistry.getThemeList().length === 0)
             await ThemeRegistry.initialize();
         const currentThemeId = this._selectedThemeId ?? (this.document.getFlag(MODULE_ID, "theme") || "none");
-        const themes = ThemeRegistry.getThemeList().map(t => ({
-            ...t,
-            name: game.i18n.localize(t.name),
-            isActive: t.id === currentThemeId,
-            hasTemplate: !!(t.contentTemplate || t.layoutPath)
-        }));
+        const activeTiers = LicenseManager.getActiveTiers();
+        const isPremiumActive = activeTiers.includes("premium");
+        const themes = ThemeRegistry.getThemeList().map(t => {
+            const themeTier = t.tier || "free";
+            const isLocked = !LicenseManager.hasTier(themeTier);
+            return {
+                ...t,
+                name: game.i18n.localize(t.name),
+                isActive: t.id === currentThemeId,
+                hasTemplate: !!(t.contentTemplate || t.layoutPath),
+                isLocked
+            };
+        });
         const selectedTheme = ThemeRegistry.getTheme(currentThemeId);
         const currentVars = this.document.getFlag(MODULE_ID, "themeVars") || {};
         const variables = selectedTheme?.variables?.map(v => ({ ...v, value: currentVars[v.key] ?? v.default })) || [];
@@ -464,7 +533,8 @@ class ThemeSelector extends foundry.applications.api.ApplicationV2 {
             themes,
             variables,
             hasVariables: variables.length > 0,
-            isGM: game.user.isGM
+            isGM: game.user.isGM,
+            isPremiumActive
         };
     }
     /** @override */
@@ -482,30 +552,13 @@ class ThemeSelector extends foundry.applications.api.ApplicationV2 {
     }
     /** @override */
     _onRender(context, options) {
-        // 1. Action Delegation (More robust than individual listeners)
-        if (!this._hasClickDelegation) {
-            this.element.addEventListener("click", ev => {
-                const target = ev.target.closest("[data-action]");
-                if (!target)
-                    return;
-                const action = target.dataset.action;
-                const handler = this.constructor.ACTIONS[action];
-                if (handler) {
-                    ev.preventDefault();
-                    ev.stopPropagation();
-                    console.log(`${MODULE_ID} | Triggering action: ${action}`);
-                    handler.call(this, ev, target);
-                }
-            });
-            this._hasClickDelegation = true;
-        }
-        // 2. Initialize Tabs (Must re-bind on every render because innerHTML is replaced)
+        // Must re-bind tabs on every render because _replaceHTML sets content.innerHTML
         for (const [group, config] of Object.entries(this.constructor.TABS)) {
             const tabConfig = config;
             new foundry.applications.ux.Tabs({
                 ...tabConfig,
                 initial: this.tabGroups[group] || tabConfig.initial,
-                callback: (event, tabs, active) => {
+                callback: (_event, _tabs, active) => {
                     this.tabGroups[group] = active;
                 }
             }).bind(this.element);
@@ -527,8 +580,18 @@ function getThemeSelectorClass() {
 }
 Hooks.once("init", async () => {
     console.log(`${MODULE_ID} | Initializing Journal CSS V3`);
+    // Load Google Fonts via link tag instead of CSS @import to avoid CSS cascade issues
     // Register Handlebars Helpers
     Handlebars.registerHelper("eq", (a, b) => a === b);
+    // Load Google Fonts via link tag if enabled
+    Hooks.once("ready", () => {
+        if (game.settings.get(MODULE_ID, "loadGoogleFonts")) {
+            const fontLink = document.createElement("link");
+            fontLink.rel = "stylesheet";
+            fontLink.href = "https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=JetBrains+Mono&family=Caveat:wght@500&family=Dancing+Script:wght@600&family=Playfair+Display:wght@400;900&family=Libre+Baskerville:wght@400;700&display=swap";
+            document.head.appendChild(fontLink);
+        }
+    });
     // Register Settings
     game.settings.register(MODULE_ID, "userThemes", {
         name: "User Themes",
@@ -537,6 +600,32 @@ Hooks.once("init", async () => {
         type: Array,
         default: [],
         onChange: () => ThemeRegistry.initialize()
+    });
+    game.settings.register(MODULE_ID, "allowPlayerThemes", {
+        name: "JOURNAL_CSS.Settings.AllowPlayerThemes.Name",
+        hint: "JOURNAL_CSS.Settings.AllowPlayerThemes.Hint",
+        scope: "world",
+        config: true,
+        type: Boolean,
+        default: false
+    });
+    game.settings.register(MODULE_ID, "loadGoogleFonts", {
+        name: "JOURNAL_CSS.Settings.LoadGoogleFonts.Name",
+        hint: "JOURNAL_CSS.Settings.LoadGoogleFonts.Hint",
+        scope: "world",
+        config: true,
+        type: Boolean,
+        default: true,
+        onChange: () => {
+            // Recarrega a página ou reconstrói para aplicar a mudança de fonte se necessário
+        }
+    });
+    game.settings.register(MODULE_ID, "premiumKeys", {
+        name: "Premium Keys",
+        scope: "client",
+        config: false,
+        type: Array,
+        default: []
     });
     await ThemeRegistry.initialize();
     // Register Keybinding
@@ -553,6 +642,147 @@ Hooks.once("init", async () => {
         }
     });
 });
+Hooks.once("ready", () => {
+    // Registra templates no HUD do Storyteller Cinema se ele estiver ativo
+    const activeTiers = LicenseManager.getActiveTiers();
+    const allThemes = ThemeRegistry.getThemeList();
+    const availableTemplates = allThemes
+        .filter(t => LicenseManager.hasTier(t.tier || "free"))
+        .map(t => ({
+        id: t.id,
+        name: t.name,
+        moduleId: MODULE_ID,
+        tier: t.tier || "free"
+    }));
+    Hooks.callAll("registerStorytellerCinemaTemplates", {
+        moduleId: MODULE_ID,
+        label: "Journal CSS",
+        icon: "fas fa-book-open",
+        templates: availableTemplates
+    });
+});
+Hooks.on("renderSettingsConfig", (_app, html) => {
+    const root = html instanceof HTMLElement ? html : html[0];
+    if (!root)
+        return;
+    const stcGroup = root.querySelector('.tab[data-tab="journal-css"]') || root.querySelector('[data-category="journal-css"]');
+    if (!stcGroup)
+        return;
+    if (stcGroup.querySelector('.journal-css-premium-banner'))
+        return;
+    const banner = document.createElement('div');
+    banner.className = 'journal-css-premium-banner';
+    Object.assign(banner.style, {
+        background: 'linear-gradient(135deg, #1a0a2e 0%, #2d1b4e 50%, #1a0a2e 100%)',
+        borderRadius: '8px',
+        padding: '20px 24px',
+        marginBottom: '16px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: '16px',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
+        border: '1px solid rgba(180,120,255,0.3)'
+    });
+    const isPremium = LicenseManager.getActiveTiers().includes('premium');
+    const statusLabel = isPremium
+        ? `<span style="color:#b47fff;font-weight:bold"><i class="fas fa-crown"></i> Premium Ativo</span>`
+        : `<span style="color:#888"><i class="fas fa-lock"></i> Versão Gratuita</span>`;
+    banner.innerHTML = `
+    <div style="flex:1">
+      <p style="margin:0;color:#fff;font-size:16px;font-weight:bold"><i class="fas fa-book-open" style="color:#b47fff"></i> Journal CSS</p>
+      <p style="margin:4px 0 0;color:#aaa;font-size:12px">Templates visuais premium para seus Diários no Foundry VTT</p>
+      <p style="margin:8px 0 0;font-size:13px">${statusLabel}</p>
+    </div>
+    <button type="button" class="journal-css-premium-btn"
+      style="background:#b47fff;color:#1a0a2e;border:none;padding:10px 20px;border-radius:6px;font-weight:bold;cursor:pointer;white-space:nowrap;box-shadow:0 2px 8px rgba(180,120,255,0.4)">
+      <i class="fas fa-key"></i> ${isPremium ? 'Gerenciar Licença' : 'Ativar Premium'}
+    </button>
+  `;
+    banner.querySelector('.journal-css-premium-btn')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        const stcApi = window.StorytellerCinema;
+        if (stcApi) {
+            // @ts-ignore — caminho resolvido em runtime pelo Foundry, não pelo compilador TS
+            import("/modules/storyteller-cinema/apps/key-manager.js")
+                .then(({ KeyManager }) => new KeyManager().render(true, { focus: true }))
+                .catch(() => {
+                openLocalKeyManagerDialog();
+            });
+        }
+        else {
+            openLocalKeyManagerDialog();
+        }
+    });
+    stcGroup.prepend(banner);
+});
+function openLocalKeyManagerDialog() {
+    const localKeys = LicenseManager.getLocalKeys();
+    const keysListHtml = localKeys.length > 0
+        ? localKeys.map(k => `
+        <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,0.1);padding:6px 10px;border-radius:4px;margin-bottom:6px;border:1px solid rgba(255,255,255,0.05)">
+          <code style="font-family:monospace;color:#b47fff">${k}</code>
+          <button type="button" class="remove-key-btn" data-key="${k}" style="width:auto;flex:0 0 auto;background:#900;color:#fff;border:none;padding:2px 8px;border-radius:4px;cursor:pointer"><i class="fas fa-trash"></i></button>
+        </div>
+      `).join('')
+        : `<p style="color:#888;font-style:italic;text-align:center;margin:12px 0">Nenhuma chave premium local cadastrada.</p>`;
+    const content = `
+    <div class="journal-css-key-dialog" style="padding:10px">
+      <p style="margin-top:0">Insira sua chave premium do <strong>Journal CSS / Storyteller Cinema</strong> abaixo:</p>
+      <div style="display:flex;gap:8px;margin-bottom:16px">
+        <input type="text" class="new-key-input" placeholder="Ex: SC-XXXX-XXXX-XXXX" style="flex:1" />
+        <button type="button" class="add-key-btn" style="background:#b47fff;color:#1a0a2e;font-weight:bold;border:none;padding:0 16px;border-radius:4px;cursor:pointer">Ativar</button>
+      </div>
+      <p style="font-weight:bold;border-bottom:1px solid #555;padding-bottom:4px;margin-bottom:8px">Chaves Ativas neste Navegador:</p>
+      <div class="keys-list-container">${keysListHtml}</div>
+    </div>
+  `;
+    const d = new Dialog({
+        title: "Journal CSS - Licença Premium Local",
+        content: content,
+        buttons: {
+            close: {
+                icon: '<i class="fas fa-times"></i>',
+                label: "Fechar"
+            }
+        },
+        default: "close",
+        render: (html) => {
+            const el = html[0] || html;
+            const input = el.querySelector('.new-key-input');
+            el.querySelector('.add-key-btn')?.addEventListener('click', async () => {
+                const key = input.value.trim();
+                if (!key)
+                    return;
+                const success = await LicenseManager.addLocalKey(key);
+                if (success) {
+                    ui.notifications?.info("Chave premium ativada localmente!");
+                    d.close();
+                    // Forçar re-render do settings se estiver aberto
+                    if (ui.activeWindow)
+                        ui.activeWindow.render();
+                }
+                else {
+                    ui.notifications?.warn("Esta chave já está ativada.");
+                }
+            });
+            el.querySelectorAll('.remove-key-btn').forEach((btn) => {
+                btn.addEventListener('click', async (e) => {
+                    const target = e.currentTarget;
+                    const key = target.dataset.key;
+                    if (key) {
+                        await LicenseManager.removeLocalKey(key);
+                        ui.notifications?.info("Chave premium removida.");
+                        d.close();
+                        if (ui.activeWindow)
+                            ui.activeWindow.render();
+                    }
+                });
+            });
+        }
+    }, { width: 450 });
+    d.render(true);
+}
 function injectThemeButton(appEl, appObj) {
     // ONLY inject if the sheet is editable
     const isEditable = appObj.isEditable || appObj.options?.editable;
@@ -676,8 +906,13 @@ async function applyJournalTheme(sheet, themeOverride, varsOverride) {
     // Inherit theme from parent if this is a page
     const parentTheme = doc.parent?.getFlag(MODULE_ID, "theme");
     const selectedTheme = themeOverride || doc.getFlag(MODULE_ID, "theme") || parentTheme || "none";
-    // Find the content container (the actual "sheet" or "page")
-    const targetEl = element.querySelector(".journal-entry-page, .journal-entry-pages, .editor-container, .journal-page-content, .page-content, .editor-content, .prosemirror, .ProseMirror") || element;
+    // Find the content container - never fall back to root element to avoid leaking theme classes
+    const contentSelectors = ".journal-entry-page, .journal-entry-pages, .editor-container, .journal-page-content, .page-content, .editor-content, .prosemirror, .ProseMirror";
+    let targetEl = element.querySelector(contentSelectors);
+    if (!targetEl)
+        targetEl = element.querySelector(".window-content");
+    if (!targetEl)
+        return; // no content container found, skip safely
     targetEl.classList.forEach((cls) => { if (cls.startsWith('journal-theme-'))
         targetEl.classList.remove(cls); });
     if (selectedTheme !== "none")
@@ -685,9 +920,7 @@ async function applyJournalTheme(sheet, themeOverride, varsOverride) {
     const parentVars = doc.parent?.getFlag(MODULE_ID, "themeVars") || {};
     const themeVars = varsOverride || doc.getFlag(MODULE_ID, "themeVars") || parentVars || {};
     ThemeRegistry.applyThemeVariables(targetEl, selectedTheme, themeVars);
-    const contentEl = element.querySelector(".ProseMirror, .editor-content, .page-content, .journal-page-content");
-    if (!contentEl)
-        return;
+    const contentEl = (targetEl.querySelector(".ProseMirror, .editor-content, .page-content, .journal-page-content") || targetEl);
     // Legacy Tweaks (Compat)
     const tweaks = doc.getFlag(MODULE_ID, "tweaks") || doc.parent?.getFlag(MODULE_ID, "tweaks") || {};
     if (tweaks.fontSize)
@@ -698,29 +931,27 @@ async function applyJournalTheme(sheet, themeOverride, varsOverride) {
         contentEl.style.textAlign = tweaks.textAlign;
     if (tweaks.fontFamily)
         contentEl.style.fontFamily = tweaks.fontFamily;
-    // Custom CSS
+    // Custom CSS - scoped inside the content container, not the root element
     const customCSS = doc.getFlag(MODULE_ID, "customCSS") || doc.parent?.getFlag(MODULE_ID, "customCSS");
     let styleTag = element.querySelector(`#${MODULE_ID}-custom-style`);
     if (customCSS) {
         if (!styleTag) {
             styleTag = document.createElement("style");
             styleTag.id = `${MODULE_ID}-custom-style`;
-            element.appendChild(styleTag);
+            targetEl.appendChild(styleTag);
         }
         styleTag.textContent = customCSS;
     }
     else if (styleTag)
         styleTag.remove();
-    // Configura um MutationObserver ultraleve no element para interceptar quando o Foundry V14 alterna dinamicamente para o modo de edição (ProseMirror)
-    if (!element._journalThemeObserver) {
+    // Configura um MutationObserver no content container para quando o Foundry alternar para edição (ProseMirror)
+    if (!targetEl._journalThemeObserver) {
         const observer = new MutationObserver((mutations) => {
             for (const m of mutations) {
                 if (m.addedNodes.length > 0) {
-                    // Se algum nó adicionado for o editor ProseMirror ou contiver o editor, re-aplica a classe do tema
                     const addedEditor = Array.from(m.addedNodes).find(n => n.classList && (n.classList.contains("editor") || n.classList.contains("ProseMirror") || n.classList.contains("editor-container") || n.querySelector(".ProseMirror, .editor, .editor-container")));
                     if (addedEditor) {
-                        // Re-aplica as classes e variáveis no novo elemento do editor
-                        const newTarget = element.querySelector(".journal-entry-page, .journal-entry-pages, .editor-container, .journal-page-content, .page-content, .editor-content, .prosemirror, .ProseMirror") || element;
+                        const newTarget = (targetEl.querySelector(contentSelectors) || targetEl);
                         newTarget.classList.forEach((cls) => { if (cls.startsWith('journal-theme-'))
                             newTarget.classList.remove(cls); });
                         if (selectedTheme !== "none")
@@ -731,8 +962,8 @@ async function applyJournalTheme(sheet, themeOverride, varsOverride) {
                 }
             }
         });
-        observer.observe(element, { childList: true, subtree: true });
-        element._journalThemeObserver = observer;
+        observer.observe(targetEl, { childList: true, subtree: true });
+        targetEl._journalThemeObserver = observer;
     }
 }
 function injectCreateByTemplateButton(appEl, appObj) {

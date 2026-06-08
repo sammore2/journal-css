@@ -25,11 +25,11 @@ gulp.task('bundle-themes', async () => {
     }
 });
 gulp.task('copy', gulp.parallel('copy-static', 'copy-readme', 'bundle-themes'));
-gulp.task('build', gulp.parallel('compile', 'copy'));
 // Configuração de Deploy Automático para o Foundry VTT
-const MODULEPATH = "D:/FoundryVTT-WindowsPortable-14.359/Data/modules/journal-css/";
+const MODULEPATH = "D:/FoundryNode/Data/modules/journal-css/";
 gulp.task('foundry', () => {
     return gulp.src('dist/**')
         .pipe(gulp.dest(MODULEPATH));
 });
+gulp.task('build', gulp.series(gulp.parallel('compile', 'copy'), 'foundry'));
 gulp.task("update", gulp.series('build', 'foundry'));

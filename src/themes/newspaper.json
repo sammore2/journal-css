@@ -1,5 +1,6 @@
 {
   "id": "newspaper",
+  "tier": "free",
   "name": "Newspaper Gazette",
   "description": "Layout editorial clássico com colunas e cabeçalho de jornal.",
   "icon": "fas fa-newspaper",
