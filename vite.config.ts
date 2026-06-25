@@ -72,6 +72,16 @@ export default defineConfig(({ mode }) => {
               return 'styles/[name][extname]';
             }
             return 'assets/[name][extname]';
+          },
+          chunkFileNames: 'scripts/[name].js',
+          manualChunks(id) {
+            if (id.includes('node_modules')) return 'vendor';
+            if (id.includes('src/scripts/')) {
+              const relative = id.split('src/scripts/')[1];
+              if (relative && relative !== 'module.ts') {
+                return relative.replace('.ts', '').replace('.js', '');
+              }
+            }
           }
         }
       }

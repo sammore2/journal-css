@@ -2,28 +2,119 @@ var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
 const MODULE_ID = "journal-css";
-class LicenseManager {
+const _LicenseManager = class _LicenseManager {
+  static sha256(ascii) {
+    function rightRotate(value, amount) {
+      return value >>> amount | value << 32 - amount;
+    }
+    const mathPow = Math.pow;
+    const maxWord = mathPow(2, 32);
+    const lengthProperty = "length";
+    let i, j;
+    let result = "";
+    const words = [];
+    const asciiLength = ascii[lengthProperty];
+    let hash = [];
+    const k = [];
+    let primeCounter = 0;
+    const isComposite = {};
+    for (let candidate = 2; primeCounter < 64; candidate++) {
+      if (!isComposite[candidate]) {
+        for (i = 0; i < 313; i += candidate) {
+          isComposite[i] = candidate;
+        }
+        hash[primeCounter] = mathPow(candidate, 0.5) * maxWord | 0;
+        k[primeCounter++] = mathPow(candidate, 1 / 3) * maxWord | 0;
+      }
+    }
+    ascii += "";
+    while (ascii[lengthProperty] % 64 - 56) ascii += "\0";
+    for (i = 0; i < ascii[lengthProperty]; i++) {
+      j = ascii.charCodeAt(i);
+      if (j >> 8) return "";
+      words[i >> 2] |= j << (3 - i % 4) * 8;
+    }
+    words[words[lengthProperty]] = asciiLength * 8 / maxWord | 0;
+    words[words[lengthProperty]] = asciiLength * 8 | 0;
+    for (j = 0; j < words[lengthProperty]; ) {
+      const w = words.slice(j, j += 16);
+      const oldHash = hash.slice(0);
+      for (i = 0; i < 64; i++) {
+        const wItem = w[i];
+        if (i >= 16) {
+          const s0 = rightRotate(w[i - 15], 7) ^ rightRotate(w[i - 15], 18) ^ w[i - 15] >>> 3;
+          const s1 = rightRotate(w[i - 2], 17) ^ rightRotate(w[i - 2], 19) ^ w[i - 2] >>> 10;
+          w[i] = w[i - 16] + s0 + w[i - 7] + s1 | 0;
+        }
+        const ch = hash[4] & hash[5] ^ ~hash[4] & hash[6];
+        const maj = hash[0] & hash[1] ^ hash[0] & hash[2] ^ hash[1] & hash[2];
+        const temp1 = hash[7] + (rightRotate(hash[4], 6) ^ rightRotate(hash[4], 11) ^ rightRotate(hash[4], 25)) + ch + k[i] + (w[i] !== void 0 ? w[i] : wItem) | 0;
+        const temp2 = (rightRotate(hash[0], 2) ^ rightRotate(hash[0], 13) ^ rightRotate(hash[0], 22)) + maj | 0;
+        hash = [temp1 + temp2 | 0].concat(hash);
+        hash[4] = hash[4] + temp1 | 0;
+        hash.length = 8;
+      }
+      for (i = 0; i < 8; i++) {
+        hash[i] = hash[i] + oldHash[i] | 0;
+      }
+    }
+    for (i = 0; i < 8; i++) {
+      for (j = 3; j + 1; j--) {
+        const b = hash[i] >> j * 8 & 255;
+        result += (b < 16 ? "0" : "") + b.toString(16);
+      }
+    }
+    return result;
+  }
+  static isDevKey(key) {
+    if (!key) return false;
+    return this.sha256(key.trim()) === this.DEV_HASH;
+  }
+  static getStorageNamespace() {
+    var _a, _b, _c, _d;
+    if ((_b = (_a = game.modules) == null ? void 0 : _a.get("storyteller-cinema")) == null ? void 0 : _b.active) {
+      return "storyteller-cinema";
+    }
+    if ((_d = (_c = game.modules) == null ? void 0 : _c.get("journal-css")) == null ? void 0 : _d.active) {
+      return "journal-css";
+    }
+    return "storm-glass";
+  }
   static getActiveTiers() {
     var _a;
     try {
-      let localKeys = [];
-      let stcKeys = [];
+      const activeNamespace = this.getStorageNamespace();
+      let allKeys = [];
       try {
-        localKeys = game.settings.get(MODULE_ID, "premiumKeys") || [];
+        const raw = game.settings.get(activeNamespace, "premiumKeys");
+        if (Array.isArray(raw)) {
+          allKeys = raw;
+        } else if (typeof raw === "string" && raw.trim()) {
+          allKeys = JSON.parse(raw.trim());
+        }
       } catch {
       }
-      try {
-        stcKeys = game.settings.get("storyteller-cinema", "premiumKeys") || [];
-      } catch {
+      if (activeNamespace !== MODULE_ID) {
+        try {
+          const rawLocal = game.settings.get(MODULE_ID, "premiumKeys");
+          let localKeys = [];
+          if (Array.isArray(rawLocal)) {
+            localKeys = rawLocal;
+          } else if (typeof rawLocal === "string" && rawLocal.trim()) {
+            localKeys = JSON.parse(rawLocal.trim());
+          }
+          allKeys = [...allKeys, ...localKeys];
+        } catch {
+        }
       }
+      allKeys = [...new Set(allKeys.map((k) => typeof k === "string" ? k.trim() : "").filter(Boolean))];
       const ignoreDev = ((_a = game.settings) == null ? void 0 : _a.get(MODULE_ID, "ignoreDevKeys")) ?? false;
-      let allKeys = [...localKeys, ...stcKeys].filter(Boolean);
       if (ignoreDev) {
-        allKeys = allKeys.filter((k) => !(k.startsWith("sammore-dev-") && k.endsWith("5633")));
+        allKeys = allKeys.filter((k) => !this.isDevKey(k));
       }
       if (allKeys.length === 0) return ["free"];
       const tiers = ["free", "premium"];
-      if (allKeys.some((k) => k.startsWith("sammore-dev-") && k.endsWith("5633"))) {
+      if (allKeys.some((k) => this.isDevKey(k))) {
         tiers.push("dev");
       }
       return tiers;
@@ -33,31 +124,47 @@ class LicenseManager {
   }
   static hasTier(tier) {
     if (!tier || tier === "free") return true;
-    const activeTiers = LicenseManager.getActiveTiers();
+    const activeTiers = _LicenseManager.getActiveTiers();
     if (activeTiers.includes("dev")) return true;
     return activeTiers.includes(tier);
   }
   static getLocalKeys() {
     try {
-      return game.settings.get(MODULE_ID, "premiumKeys") || [];
+      const activeNamespace = this.getStorageNamespace();
+      const raw = game.settings.get(activeNamespace, "premiumKeys") || [];
+      let keys = [];
+      if (Array.isArray(raw)) {
+        keys = raw;
+      } else if (typeof raw === "string" && raw.trim()) {
+        keys = JSON.parse(raw.trim());
+      }
+      return keys;
     } catch {
       return [];
     }
   }
   static async addLocalKey(key) {
     const keys = this.getLocalKeys();
+    key = key.trim();
     if (keys.includes(key)) return false;
     keys.push(key);
-    await game.settings.set(MODULE_ID, "premiumKeys", keys);
+    const activeNamespace = this.getStorageNamespace();
+    const valToSet = Array.isArray(game.settings.get(activeNamespace, "premiumKeys")) ? keys : JSON.stringify(keys);
+    await game.settings.set(activeNamespace, "premiumKeys", valToSet);
     return true;
   }
   static async removeLocalKey(key) {
     const keys = this.getLocalKeys();
+    key = key.trim();
     const filtered = keys.filter((k) => k !== key);
-    await game.settings.set(MODULE_ID, "premiumKeys", filtered);
+    const activeNamespace = this.getStorageNamespace();
+    const valToSet = Array.isArray(game.settings.get(activeNamespace, "premiumKeys")) ? filtered : JSON.stringify(filtered);
+    await game.settings.set(activeNamespace, "premiumKeys", valToSet);
     return true;
   }
-}
+};
+__publicField(_LicenseManager, "DEV_HASH", "d15d20f977293ef0df82cffd9591f0092734266d9ef0ed7cbba58650ba820773");
+let LicenseManager = _LicenseManager;
 class ThemeRegistry {
   static async loadHubTemplates() {
     var _a, _b, _c, _d, _e;
