@@ -2,23 +2,20 @@
   "name": "journal-css",
   "version": "0.1.0",
   "description": "Premium themed journals for Foundry VTT (Gazette style and more)",
-  "main": "index.js",
+  "type": "module",
   "scripts": {
-    "build": "gulp build",
-    "update": "gulp update",
-    "dev": "gulp build && gulp watch"
+    "dev": "vite",
+    "build": "vite build",
+    "update": "vite build"
   },
   "author": "Rob Sammore",
   "license": "MIT",
   "devDependencies": {
     "@league-of-foundry-developers/foundry-vtt-types": "^13.346.0-beta.20250812191140",
     "@types/jquery": "^3.5.30",
-    "gulp": "^4.0.2",
-    "gulp-typescript": "^6.0.0-alpha.1",
-    "ts-node": "^10.9.2"
+    "vite": "^6.0.3"
   },
   "dependencies": {
-    "@types/node": "^14.10.1",
     "typescript": "^5.0.0"
   }
 }

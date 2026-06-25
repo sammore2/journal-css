@@ -1,0 +1,30 @@
+/* Theme: Letter (Elegant Letter)
+ * Scoped to .journal-theme-letter
+ */
+
+.journal-theme-letter {
+    --letter-bg: #faf6f0;
+    --letter-text: #2c2c2c;
+    --letter-accent: #8b0000;
+    --letter-font-body: 'Crimson Text', 'Libre Baskerville', serif;
+
+    background: var(--letter-bg) !important;
+    background-image: url("https://www.transparenttextures.com/patterns/handmade-paper.png") !important;
+    color: var(--letter-text) !important;
+    font-family: var(--letter-font-body) !important;
+}
+
+.journal-theme-letter.journal-entry-pages, .journal-theme-letter .journal-entry-pages,
+.journal-theme-letter.journal-entry-page, .journal-theme-letter .journal-entry-page,
+.journal-theme-letter.journal-page-content, .journal-theme-letter .journal-page-content,
+.journal-theme-letter.page-content, .journal-theme-letter .page-content,
+.journal-theme-letter.editor-container, .journal-theme-letter .editor-container,
+.journal-theme-letter.editor-content, .journal-theme-letter .editor-content,
+.journal-theme-letter .ProseMirror, .journal-theme-letter .prosemirror {
+    background: var(--letter-bg) !important;
+    background-image: url("https://www.transparenttextures.com/patterns/handmade-paper.png") !important;
+    color: var(--letter-text);
+    font-family: var(--letter-font-body);
+    box-shadow: inset 0 0 80px rgba(0,0,0,0.03);
+    padding: 30px !important;
+}

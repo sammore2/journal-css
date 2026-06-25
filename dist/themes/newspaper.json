@@ -1,0 +1,23 @@
+{
+  "id": "newspaper",
+  "tier": "free",
+  "name": "Newspaper Gazette",
+  "description": "Layout editorial clássico com colunas e cabeçalho de jornal.",
+  "icon": "fas fa-newspaper",
+  "cssPath": "modules/journal-css/styles/themes/newspaper.css",
+  "layoutPath": "modules/journal-css/templates/layouts/newspaper.hbs",
+  "variables": [
+    {
+      "key": "--newspaper-bg",
+      "label": "Cor do Papel",
+      "type": "color",
+      "default": "#f2e6c8"
+    },
+    {
+      "key": "--newspaper-ink",
+      "label": "Cor da Tinta",
+      "type": "color",
+      "default": "#1e1200"
+    }
+  ]
+}

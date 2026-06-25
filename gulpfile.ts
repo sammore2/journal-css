@@ -22,8 +22,8 @@ gulp.task('bundle-themes', async () => {
   if (!fs.existsSync('dist')) fs.mkdirSync('dist');
   const themesDir = path.join(__dirname, 'src', 'themes');
   if (fs.existsSync(themesDir)) {
-    const themeFiles = fs.readdirSync(themesDir).filter(f => f.endsWith('.json'));
-    const themes = themeFiles.map(f => JSON.parse(fs.readFileSync(path.join(themesDir, f), 'utf8')));
+    const themeFiles = fs.readdirSync(themesDir).filter((f: string) => f.endsWith('.json'));
+    const themes = themeFiles.map((f: string) => JSON.parse(fs.readFileSync(path.join(themesDir, f), 'utf8')));
     fs.writeFileSync(path.join(__dirname, 'dist', 'themes.json'), JSON.stringify(themes, null, 2));
   }
 });
